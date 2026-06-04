@@ -93,7 +93,7 @@
       <div class="card-meta" id="mem-meta"></div>
     </a>
     <a class="card" href="ombrebrain.html">
-      <div class="card-icon amber">◉</div>
+      <div class="card-icon">◉</div>
       <div class="card-name">Ombre Brain</div>
       <div class="card-desc">记忆系统，指令模板 + 使用指南</div>
       <div class="card-meta"></div>
@@ -128,13 +128,22 @@ async function fetchJSON(path) {
   } catch { return null; }
 }
 
+async function fetchTodos() {
+  const t = getToken(); if (!t) return null;
+  try {
+    const r = await fetch(${API}/repos/webkit1005-collab/todolist-data/contents/state.json, { headers: { Authorization: 	oken +${t} } });
+    if (!r.ok) return null;
+    const j = await r.json();
+    return JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,'')))));
+  } catch { return null; }
+}
 async function buildContext() {
-  const [todos, memories, profile] = await Promise.all([fetchJSON('todos.json'), fetchJSON('memories.json'), fetchJSON('profile.json')]);
+  const [todos, memories, profile] = await Promise.all([fetchTodos(), fetchJSON('memories.json'), fetchJSON('profile.json')]);
   let parts = [];
   const today = new Date().toLocaleDateString('zh-CN');
   parts.push(`[CONTEXT HANDOFF — ${today}]`);
   if (profile) { parts.push(`\n[PROFILE]\n${profile.summary||''}`); document.getElementById('profile-meta').textContent = '已加载'; }
-  if (todos) { const active=(todos.items||[]).filter(t=>!t.done); parts.push(`\n[TODOS — ${active.length} 条未完成]\n`+active.map(t=>`• ${t.text}${t.ddl?' [DDL:'+t.ddl+']':''}`).join('\n')); document.getElementById('todo-meta').textContent=`${active.length} 条未完成`; }
+  if (todos) { const active=(todos.topics||[]).filter(t=>!t.done); parts.push(`\n[TODOS — ${active.length} 条未完成]\n`+active.map(t=>`• ${t.text}${t.ddl?' [DDL:'+t.ddl+']':''}`).join('\n')); document.getElementById('todo-meta').textContent=`${active.length} 条未完成`; }
   if (memories) {
     const handoffs = (memories.handoffs||[]).slice(0,2);
     if (handoffs.length) parts.push(`\n[LAST HANDOFF]\n`+handoffs.map(h=>`[${h.date}] ${h.content||''}`).join('\n'));
