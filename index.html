@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CONTEXT HANDOFF</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0d0f; --surface: #161618; --surface2: #1e1e21;
+    --border: #2a2a2e; --text: #e8e8ea; --muted: #666;
+    --accent: #7c6ef5; --accent-dim: rgba(124,110,245,0.12);
+    --green: #4ade80; --red: #f87171;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 40px 24px; }
+  .header { max-width: 900px; margin: 0 auto 48px; display: flex; justify-content: space-between; align-items: flex-end; }
+  .site-title { font-size: 11px; font-weight: 600; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; }
+  .clock { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .main { max-width: 900px; margin: 0 auto; }
+  .label { font-size: 10px; font-weight: 600; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; margin-bottom: 16px; }
+  .modules { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-bottom: 40px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; text-decoration: none; color: inherit; transition: border-color 0.15s, background 0.15s; display: block; }
+  .card:hover { border-color: var(--accent); background: var(--surface2); }
+  .card-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--accent-dim); display: flex; align-items: center; justify-content: center; margin-bottom: 14px; font-size: 15px; }
+  .card-name { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 6px; }
+  .card-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .card-meta { margin-top: 14px; font-size: 11px; color: var(--muted); }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 16px; }
+  .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .btn { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 7px 14px; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
+  .btn:hover { opacity: 0.85; }
+  .btn.success { background: var(--green); color: #000; }
+  .btn.danger { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .btn.danger:hover { border-color: var(--red); color: var(--red); }
+  .context-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; font-size: 12px; color: var(--muted); line-height: 1.7; white-space: pre-wrap; max-height: 200px; overflow-y: auto; font-family: monospace; }
+  .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 6px; }
+  .dot.green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .dot.red { background: var(--red); }
+  /* Token setup */
+  .setup-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
+  .setup-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; width: 100%; max-width: 420px; }
+  .setup-title { font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 8px; }
+  .setup-desc { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
+  .setup-input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 12px; font-family: monospace; outline: none; }
+  .setup-input:focus { border-color: var(--accent); }
+  .setup-actions { display: flex; gap: 8px; margin-top: 16px; }
+</style>
+</head>
+<body>
+
+<div class="setup-overlay" id="setupOverlay" style="display:none">
+  <div class="setup-box">
+    <div class="setup-title">GitHub Token</div>
+    <div class="setup-desc">需要一个 GitHub Personal Access Token 来读写数据。只需输入一次，存在本地浏览器里，不会上传到任何地方。<br><br>Token 需要有 <code>repo</code> 权限。</div>
+    <input class="setup-input" id="tokenInput" type="password" placeholder="ghp_xxxxxxxxxxxx">
+    <div class="setup-actions">
+      <button class="btn" onclick="saveToken()">SAVE</button>
+    </div>
+  </div>
+</div>
+
+<div class="header">
+  <div class="site-title">Context Handoff</div>
+  <div style="display:flex;gap:16px;align-items:center">
+    <button class="btn danger" onclick="resetToken()" style="padding:4px 10px;font-size:10px">TOKEN</button>
+    <div class="clock" id="clock">--:--:--</div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="label">Modules</div>
+  <div class="modules">
+    <a class="card" href="todolist.html">
+      <div class="card-icon">✓</div>
+      <div class="card-name">Todolist</div>
+      <div class="card-desc">话题追踪、任务、DDL，跨会话不丢失</div>
+      <div class="card-meta" id="todo-meta">—</div>
+    </a>
+    <a class="card" href="memory.html">
+      <div class="card-icon">◎</div>
+      <div class="card-name">Memory</div>
+      <div class="card-desc">每次对话结束后的总结与记录</div>
+      <div class="card-meta" id="mem-meta">—</div>
+    </a>
+    <a class="card" href="profile.html">
+      <div class="card-icon">◈</div>
+      <div class="card-name">Profile</div>
+      <div class="card-desc">个人信息、偏好、背景，给 Claude 的基础上下文</div>
+      <div class="card-meta" id="profile-meta">—</div>
+    </a>
+  </div>
+
+  <div class="label">Claude Context</div>
+  <div class="panel">
+    <div class="panel-header">
+      <span style="font-size:12px;color:var(--muted)"><span class="dot green"></span>Ready to copy</span>
+      <button class="btn" id="copyBtn" onclick="copyContext()">COPY</button>
+    </div>
+    <div class="context-box" id="contextBox">正在加载...</div>
+  </div>
+</div>
+
+<script>
+const OWNER = 'webkit1005-collab';
+const REPO = 'context-handoff';
+const API = 'https://api.github.com';
+
+function getToken() { return localStorage.getItem('ch_token'); }
+
+function saveToken() {
+  const t = document.getElementById('tokenInput').value.trim();
+  if (!t) return;
+  localStorage.setItem('ch_token', t);
+  document.getElementById('setupOverlay').style.display = 'none';
+  init();
+}
+
+function resetToken() {
+  localStorage.removeItem('ch_token');
+  document.getElementById('tokenInput').value = '';
+  document.getElementById('setupOverlay').style.display = 'flex';
+}
+
+function clock() {
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('zh-CN', {hour12:false});
+}
+setInterval(clock, 1000); clock();
+
+async function fetchJSON(path) {
+  const t = getToken();
+  if (!t) return null;
+  try {
+    const r = await fetch(`${API}/repos/${OWNER}/${REPO}/contents/data/${path}`, {
+      headers: { Authorization: `token ${t}` }
+    });
+    if (!r.ok) return null;
+    const j = await r.json();
+    return JSON.parse(atob(j.content.replace(/\n/g,'')));
+  } catch { return null; }
+}
+
+async function buildContext() {
+  const [todos, memories, profile] = await Promise.all([
+    fetchJSON('todos.json'), fetchJSON('memories.json'), fetchJSON('profile.json')
+  ]);
+  let parts = [];
+  const today = new Date().toLocaleDateString('zh-CN');
+  parts.push(`[CONTEXT HANDOFF — ${today}]`);
+
+  if (profile) {
+    parts.push(`\n[PROFILE]\n${profile.summary || ''}`);
+    document.getElementById('profile-meta').textContent = '已加载';
+  }
+  if (todos) {
+    const active = (todos.items || []).filter(t => !t.done);
+    parts.push(`\n[TODOS — ${active.length} 条未完成]\n` + active.map(t => `• ${t.text}${t.ddl?' [DDL:'+t.ddl+']':''}`).join('\n'));
+    document.getElementById('todo-meta').textContent = `${active.length} 条未完成`;
+  }
+  if (memories && memories.length) {
+    const recent = memories.slice(-3);
+    parts.push(`\n[RECENT MEMORIES]\n` + recent.map(m => `[${m.date}] ${m.summary}`).join('\n'));
+    document.getElementById('mem-meta').textContent = `${memories.length} 条记录`;
+  }
+  if (parts.length === 1) parts.push('\n（暂无数据，请先填写各模块）');
+  document.getElementById('contextBox').textContent = parts.join('');
+}
+
+function copyContext() {
+  navigator.clipboard.writeText(document.getElementById('contextBox').textContent);
+  const btn = document.getElementById('copyBtn');
+  btn.textContent = 'COPIED'; btn.classList.add('success');
+  setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('success'); }, 1500);
+}
+
+function init() {
+  if (!getToken()) { document.getElementById('setupOverlay').style.display = 'flex'; return; }
+  buildContext();
+}
+init();
+</script>
+</body>
+</html>
