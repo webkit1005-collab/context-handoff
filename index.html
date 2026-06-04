@@ -103,7 +103,7 @@
   <div class="label">Claude Context</div>
   <div class="panel">
     <div class="panel-header">
-      <span style="font-size:12px;color:var(--muted)"><span class="dot green"></span>Ready to copy</span>
+      <span style="font-size:12px;color:var(--muted)"><span class="dot" id="statusDot" style="background:var(--muted)"></span><span id="statusText">加载中…</span></span>
       <button class="btn" id="copyBtn" onclick="copyContext()">COPY</button>
     </div>
     <div class="context-box" id="contextBox">正在加载...</div>
@@ -152,6 +152,8 @@ async function buildContext() {
   }
   if (parts.length===1) parts.push('\n（暂无数据，请先填写各模块）');
   document.getElementById('contextBox').textContent = parts.join('');
+  document.getElementById('statusDot').style.cssText = 'background:var(--green);box-shadow:0 0 6px var(--green)';
+  document.getElementById('statusText').textContent = 'Ready to copy';
 }
 
 function copyContext() {
