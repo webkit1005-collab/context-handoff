@@ -138,6 +138,12 @@ async function fetchTodos() {
   } catch { return null; }
 }
 async function buildContext() {
+  const cached = localStorage.getItem('ch_index_cache');
+  if (cached) {
+    document.getElementById('contextBox').textContent = cached;
+    document.getElementById('statusDot').style.cssText = 'background:var(--green);box-shadow:0 0 6px var(--green)';
+    document.getElementById('statusText').textContent = 'Ready to copy';
+  }
   const [todos, memories, profile] = await Promise.all([fetchTodos(), fetchJSON('memories.json'), fetchJSON('profile.json')]);
   let parts = [];
   const today = new Date().toLocaleDateString('zh-CN');
@@ -151,7 +157,9 @@ async function buildContext() {
     document.getElementById('mem-meta').textContent = total ? `${total} 条记录` : '';
   }
   if (parts.length===1) parts.push('\n（暂无数据，请先填写各模块）');
-  document.getElementById('contextBox').textContent = parts.join('');
+  const result = parts.join('');
+  document.getElementById('contextBox').textContent = result;
+  localStorage.setItem('ch_index_cache', result);
   document.getElementById('statusDot').style.cssText = 'background:var(--green);box-shadow:0 0 6px var(--green)';
   document.getElementById('statusText').textContent = 'Ready to copy';
 }
