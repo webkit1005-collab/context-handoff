@@ -131,7 +131,7 @@ async function fetchJSON(path) {
 async function fetchTodos() {
   const t = getToken(); if (!t) return null;
   try {
-    const r = await fetch(${API}/repos/webkit1005-collab/todolist-data/contents/state.json, { headers: { Authorization: 	oken +${t} } });
+    const r = await fetch(API + "/repos/webkit1005-collab/todolist-data/contents/state.json", { headers: { Authorization: "token " + t } });
     if (!r.ok) return null;
     const j = await r.json();
     return JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,'')))));
