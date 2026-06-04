@@ -124,7 +124,7 @@ async function fetchJSON(path) {
     const r = await fetch(`${API}/repos/${OWNER}/${REPO}/contents/data/${path}`, { headers: { Authorization: `token ${t}` } });
     if (!r.ok) return null;
     const j = await r.json();
-    return JSON.parse(atob(j.content.replace(/\n/g,'')));
+    return JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,'')))));
   } catch { return null; }
 }
 
