@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MEMORY — Context Handoff</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -13,29 +15,31 @@
     --accent: #7c6ef5; --accent-dim: rgba(124,110,245,0.12);
     --green: #4ade80; --red: #f87171; --amber: #fbbf24;
   }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 40px 24px; }
+  body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 40px 24px; }
   .header { max-width: 720px; margin: 0 auto 40px; display: flex; justify-content: space-between; align-items: center; }
   .back { font-size: 11px; color: var(--muted); text-decoration: none; letter-spacing: 0.1em; }
   .back:hover { color: var(--text); }
   .page-title { font-size: 11px; font-weight: 600; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; }
   .main { max-width: 720px; margin: 0 auto; }
-
   .tabs { display: flex; gap: 4px; margin-bottom: 28px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 4px; width: fit-content; }
   .tab-btn { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; padding: 7px 18px; border-radius: 7px; border: none; background: transparent; color: var(--muted); cursor: pointer; font-family: inherit; transition: all 0.15s; }
   .tab-btn.active { background: var(--accent); color: #fff; }
   .tab-btn:not(.active):hover { color: var(--text); }
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
-
-  .section-label { font-size: 10px; font-weight: 600; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
-  .section-hint { font-size: 12px; color: #444; line-height: 1.6; margin-bottom: 16px; }
+  .section-hint { font-size: 12px; color: #444; line-height: 1.6; margin-bottom: 20px; }
   .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; margin-bottom: 16px; }
   .step-num { display: inline-block; font-size: 10px; font-weight: 600; letter-spacing: 0.1em; color: var(--accent); background: var(--accent-dim); border-radius: 5px; padding: 2px 8px; margin-bottom: 10px; }
   .step-desc { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
-
   .copy-template { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; font-size: 12px; color: var(--muted); line-height: 1.7; margin-bottom: 12px; font-style: italic; }
-  input[type=date] { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--text); font-size: 12px; font-family: inherit; outline: none; transition: border-color 0.15s; margin-bottom: 10px; }
+  input[type=date] {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 12px; color: var(--text); font-size: 12px; font-family: inherit;
+    outline: none; transition: border-color 0.15s; margin-bottom: 10px;
+    color-scheme: dark;
+  }
   input[type=date]:focus { border-color: var(--accent); }
+  input[type=date]::-webkit-calendar-picker-indicator { filter: invert(0.5); cursor: pointer; }
   textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; color: var(--text); font-size: 13px; font-family: inherit; outline: none; resize: none; line-height: 1.6; transition: border-color 0.15s; }
   textarea:focus { border-color: var(--accent); }
   textarea::placeholder { color: #333; }
@@ -47,11 +51,9 @@
   .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 7px 16px; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: inherit; transition: all 0.15s; }
   .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
   .btn-ghost.copied { background: var(--green); border-color: var(--green); color: #000; }
-
   .note-box { background: rgba(251,191,36,0.05); border: 1px solid rgba(251,191,36,0.15); border-radius: 10px; padding: 12px 16px; font-size: 12px; color: #888; line-height: 1.6; margin-bottom: 20px; }
-
   .records-label { font-size: 10px; font-weight: 600; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; }
-  .sync-status { font-size: 11px; color: var(--muted); margin-bottom: 10px; min-height: 16px; }
+  .sync-status { font-size: 11px; color: var(--muted); min-height: 16px; }
   .entries { display: flex; flex-direction: column; gap: 10px; }
   .entry { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
   .entry-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -75,20 +77,17 @@
     <button class="tab-btn" onclick="switchTab('journal')">日常笔记</button>
   </div>
 
-  <!-- HANDOFF TAB -->
   <div class="tab-panel active" id="tab-handoff">
     <div class="section-hint">对话快到上下文限制时，用这里生成交接记录，下次换窗直接读取，不需要重新解释背景。</div>
-
     <div class="panel">
       <div class="step-num">STEP 1</div>
       <div class="step-desc">复制下方指令，发给 Claude，让它帮你写交接记录。</div>
-      <div class="copy-template" id="handoff-template">我们的对话快到上下文限制了，请帮我写一份换窗交接记录，包含：① 这次对话的主要内容和进展 ② 还未完成的事项 ③ 下次开始时需要了解的关键信息。格式简洁清晰，方便我直接贴到 context-handoff 里。</div>
+      <div class="copy-template" id="handoff-template">我们聊了挺久了，感觉快换窗了。帮我写个交接小记吧，就像给下一个你留言——今天做了啥、聊到哪了、还有什么没搞完、下次从哪接上。随意点就好。</div>
       <button class="btn-ghost" id="copyTplBtn" onclick="copyTemplate()">COPY INSTRUCTION</button>
     </div>
-
     <div class="panel">
       <div class="step-num">STEP 2</div>
-      <div class="step-desc">把 Claude 写好的交接记录粘贴到下方，保存后会自动同步到首页的 Claude Context。</div>
+      <div class="step-desc">把 Claude 写好的交接记录粘贴到下方，保存后会同步到首页的 Claude Context。</div>
       <input type="date" id="h-date">
       <textarea id="h-content" rows="8" placeholder="把 Claude 的回复粘贴在这里…"></textarea>
       <div class="row">
@@ -96,16 +95,13 @@
         <button class="btn" id="h-save-btn" onclick="addHandoff()">SAVE</button>
       </div>
     </div>
-
     <div class="records-label">历史交接记录</div>
     <div class="entries" id="handoff-list"><div class="empty">暂无记录</div></div>
   </div>
 
-  <!-- JOURNAL TAB -->
   <div class="tab-panel" id="tab-journal">
-    <div class="section-hint">用来记录你自己想留存的日常内容，和 Claude 无关，不会出现在首页的 Claude Context 里。</div>
-    <div class="note-box">和 Ombre Brain 的 Grow（写日记）有什么区别？<br>Grow 存的是给克看的记忆，存在 Ombre Brain 里；这里的笔记是你自己的，存在 GitHub 里，只有你能看。</div>
-
+    <div class="section-hint">用来记录你自己想留存的日常内容，不会出现在首页的 Claude Context 里。</div>
+    <div class="note-box">和 Ombre Brain 的 Grow 有什么区别？Grow 存的是给克看的记忆，存在 Ombre Brain 里；这里的笔记是你自己的，存在 GitHub 里，只有你能看。</div>
     <div class="panel">
       <input type="date" id="j-date">
       <textarea id="j-text" rows="6" placeholder="今天发生了什么、想记录什么…"></textarea>
@@ -114,7 +110,6 @@
         <button class="btn" id="j-save-btn" onclick="addJournal()">SAVE</button>
       </div>
     </div>
-
     <div class="records-label">历史笔记</div>
     <div class="entries" id="journal-list"><div class="empty">暂无记录</div></div>
   </div>
@@ -122,7 +117,7 @@
 
 <script>
 const OWNER = 'webkit1005-collab', REPO = 'context-handoff', API = 'https://api.github.com';
-const PATH = 'data/memories.json';
+const PATH = 'data/memories.json', CACHE_KEY = 'ch_memory_data';
 function getToken() { return localStorage.getItem('ch_token'); }
 function setStatus(id, msg) { document.getElementById(id).textContent = msg; }
 
@@ -139,24 +134,34 @@ function switchTab(name) {
 }
 
 function copyTemplate() {
-  const text = document.getElementById('handoff-template').textContent;
-  navigator.clipboard.writeText(text);
+  navigator.clipboard.writeText(document.getElementById('handoff-template').textContent);
   const btn = document.getElementById('copyTplBtn');
   btn.textContent = 'COPIED'; btn.classList.add('copied');
   setTimeout(() => { btn.textContent = 'COPY INSTRUCTION'; btn.classList.remove('copied'); }, 1400);
 }
 
 async function load() {
-  const t = getToken(); if (!t) { setStatus('h-status','未设置 Token'); return; }
+  const cached = localStorage.getItem(CACHE_KEY);
+  if (cached) {
+    try {
+      const c = JSON.parse(cached);
+      data = { handoffs: c.handoffs||[], journal: c.journal||[] };
+      fileSha = c._sha || null;
+      render();
+    } catch {}
+  }
+  const t = getToken();
+  if (!t) { setStatus('h-status', '未设置 Token'); return; }
   try {
     const r = await fetch(`${API}/repos/${OWNER}/${REPO}/contents/${PATH}`, { headers: { Authorization: `token ${t}` } });
-    if (r.status === 404) { data = { handoffs: [], journal: [] }; fileSha = null; render(); return; }
+    if (r.status === 404) { data = { handoffs: [], journal: [] }; fileSha = null; localStorage.setItem(CACHE_KEY, JSON.stringify(data)); render(); return; }
     if (!r.ok) throw new Error();
     const j = await r.json(); fileSha = j.sha;
     const parsed = JSON.parse(atob(j.content.replace(/\n/g,'')));
-    data = { handoffs: parsed.handoffs || [], journal: parsed.journal || [] };
+    data = { handoffs: parsed.handoffs||[], journal: parsed.journal||[] };
+    localStorage.setItem(CACHE_KEY, JSON.stringify({...data, _sha: fileSha}));
     render();
-  } catch { setStatus('h-status','加载失败'); }
+  } catch { if (!cached) setStatus('h-status', '加载失败'); }
 }
 
 async function persist(msg) {
@@ -166,62 +171,44 @@ async function persist(msg) {
   const r = await fetch(`${API}/repos/${OWNER}/${REPO}/contents/${PATH}`, {
     method: 'PUT', headers: { Authorization: `token ${t}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body)
   });
-  if (r.ok) { const j = await r.json(); fileSha = j.content.sha; return true; }
+  if (r.ok) { const j = await r.json(); fileSha = j.content.sha; localStorage.setItem(CACHE_KEY, JSON.stringify({...data, _sha: fileSha})); return true; }
   return false;
 }
 
 async function addHandoff() {
-  const content = document.getElementById('h-content').value.trim();
-  const date = document.getElementById('h-date').value;
+  const content = document.getElementById('h-content').value.trim(), date = document.getElementById('h-date').value;
   if (!content) return;
-  const btn = document.getElementById('h-save-btn');
-  btn.disabled = true; btn.textContent = '…';
+  const btn = document.getElementById('h-save-btn'); btn.disabled = true; btn.textContent = '…';
   data.handoffs.unshift({ id: Date.now(), date, content });
   setStatus('h-status','保存中…');
   const ok = await persist('add handoff');
-  if (ok) {
-    document.getElementById('h-content').value = '';
-    setStatus('h-status','');
-    btn.textContent = 'SAVED'; btn.classList.add('success');
-    setTimeout(() => { btn.textContent = 'SAVE'; btn.classList.remove('success'); btn.disabled = false; }, 1200);
-    render();
-  } else { data.handoffs.shift(); setStatus('h-status','保存失败'); btn.textContent = 'SAVE'; btn.disabled = false; }
+  if (ok) { document.getElementById('h-content').value = ''; setStatus('h-status',''); btn.textContent='SAVED'; btn.classList.add('success'); setTimeout(()=>{btn.textContent='SAVE';btn.classList.remove('success');btn.disabled=false;},1200); render(); }
+  else { data.handoffs.shift(); setStatus('h-status','保存失败'); btn.textContent='SAVE'; btn.disabled=false; }
 }
 
 async function addJournal() {
-  const text = document.getElementById('j-text').value.trim();
-  const date = document.getElementById('j-date').value;
+  const text = document.getElementById('j-text').value.trim(), date = document.getElementById('j-date').value;
   if (!text) return;
-  const btn = document.getElementById('j-save-btn');
-  btn.disabled = true; btn.textContent = '…';
+  const btn = document.getElementById('j-save-btn'); btn.disabled = true; btn.textContent = '…';
   data.journal.unshift({ id: Date.now(), date, text });
   setStatus('j-status','保存中…');
   const ok = await persist('add journal');
-  if (ok) {
-    document.getElementById('j-text').value = '';
-    setStatus('j-status','');
-    btn.textContent = 'SAVED'; btn.classList.add('success');
-    setTimeout(() => { btn.textContent = 'SAVE'; btn.classList.remove('success'); btn.disabled = false; }, 1200);
-    render();
-  } else { data.journal.shift(); setStatus('j-status','保存失败'); btn.textContent = 'SAVE'; btn.disabled = false; }
+  if (ok) { document.getElementById('j-text').value = ''; setStatus('j-status',''); btn.textContent='SAVED'; btn.classList.add('success'); setTimeout(()=>{btn.textContent='SAVE';btn.classList.remove('success');btn.disabled=false;},1200); render(); }
+  else { data.journal.shift(); setStatus('j-status','保存失败'); btn.textContent='SAVE'; btn.disabled=false; }
 }
 
 async function delEntry(type, id) {
-  const arr = data[type];
-  const idx = arr.findIndex(x => x.id === id);
-  if (idx === -1) return;
-  const removed = arr.splice(idx, 1)[0];
-  const ok = await persist('delete entry');
-  if (!ok) arr.splice(idx, 0, removed);
-  render();
+  const arr = data[type], idx = arr.findIndex(x=>x.id===id); if(idx===-1)return;
+  const removed = arr.splice(idx,1)[0];
+  const ok = await persist('delete entry'); if(!ok) arr.splice(idx,0,removed); render();
 }
 
 function render() {
   document.getElementById('handoff-list').innerHTML = data.handoffs.length
-    ? data.handoffs.map(h => `<div class="entry"><div class="entry-header"><div class="entry-date">${h.date}</div><button class="del-btn" onclick="delEntry('handoffs',${h.id})">×</button></div><div class="entry-text">${(h.content||'').replace(/</g,'&lt;')}</div></div>`).join('')
+    ? data.handoffs.map(h=>`<div class="entry"><div class="entry-header"><div class="entry-date">${h.date}</div><button class="del-btn" onclick="delEntry('handoffs',${h.id})">×</button></div><div class="entry-text">${(h.content||'').replace(/</g,'&lt;')}</div></div>`).join('')
     : '<div class="empty">暂无记录</div>';
   document.getElementById('journal-list').innerHTML = data.journal.length
-    ? data.journal.map(j => `<div class="entry"><div class="entry-header"><div class="entry-date">${j.date}</div><button class="del-btn" onclick="delEntry('journal',${j.id})">×</button></div><div class="entry-text">${(j.text||'').replace(/</g,'&lt;')}</div></div>`).join('')
+    ? data.journal.map(j=>`<div class="entry"><div class="entry-header"><div class="entry-date">${j.date}</div><button class="del-btn" onclick="delEntry('journal',${j.id})">×</button></div><div class="entry-text">${(j.text||'').replace(/</g,'&lt;')}</div></div>`).join('')
     : '<div class="empty">暂无记录</div>';
 }
 
