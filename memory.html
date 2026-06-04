@@ -14,33 +14,47 @@
     --green: #4ade80; --red: #f87171;
   }
   body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 40px 24px; }
-  .header { max-width: 680px; margin: 0 auto 48px; display: flex; justify-content: space-between; align-items: center; }
+  .header { max-width: 720px; margin: 0 auto 40px; display: flex; justify-content: space-between; align-items: center; }
   .back { font-size: 11px; color: var(--muted); text-decoration: none; letter-spacing: 0.1em; }
   .back:hover { color: var(--text); }
   .page-title { font-size: 11px; font-weight: 600; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; }
-  .save-btn { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 7px 16px; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
-  .save-btn:hover { opacity: 0.85; }
-  .save-btn.success { background: var(--green); color: #000; }
-  .save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .main { max-width: 680px; margin: 0 auto; }
+  .main { max-width: 720px; margin: 0 auto; }
+
+  .tabs { display: flex; gap: 4px; margin-bottom: 28px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 4px; width: fit-content; }
+  .tab-btn { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; padding: 7px 18px; border-radius: 7px; border: none; background: transparent; color: var(--muted); cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .tab-btn.active { background: var(--accent); color: #fff; }
+  .tab-btn:not(.active):hover { color: var(--text); }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
   .label { font-size: 10px; font-weight: 600; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; margin-bottom: 14px; }
-  .add-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; margin-bottom: 32px; }
-  .add-row { display: flex; gap: 8px; margin-bottom: 10px; align-items: center; }
-  .date-input { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; color: var(--muted); font-size: 12px; font-family: inherit; outline: none; }
-  .date-input:focus { border-color: var(--accent); }
+  .add-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; margin-bottom: 28px; }
+  .field { margin-bottom: 12px; }
+  .field-label { font-size: 10px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; display: block; }
+  input[type=date], input[type=text] { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; color: var(--text); font-size: 12px; font-family: inherit; outline: none; transition: border-color 0.15s; }
+  input[type=date]:focus, input[type=text]:focus { border-color: var(--accent); }
   textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; color: var(--text); font-size: 13px; font-family: inherit; outline: none; resize: none; line-height: 1.6; transition: border-color 0.15s; }
   textarea:focus { border-color: var(--accent); }
-  .add-footer { display: flex; justify-content: flex-end; margin-top: 10px; }
+  .add-footer { display: flex; justify-content: flex-end; margin-top: 12px; }
+  .btn { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 7px 16px; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
+  .btn:hover { opacity: 0.85; }
+  .btn.success { background: var(--green); color: #000; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
   .entries { display: flex; flex-direction: column; gap: 10px; }
   .entry { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
-  .entry-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .entry-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .entry-meta { display: flex; flex-direction: column; gap: 3px; }
   .entry-date { font-size: 10px; font-weight: 600; letter-spacing: 0.14em; color: var(--accent); text-transform: uppercase; }
-  .del-btn { background: none; border: none; color: var(--muted); font-size: 14px; cursor: pointer; padding: 0; line-height: 1; opacity: 0; transition: opacity 0.15s, color 0.15s; }
+  .entry-title { font-size: 12px; color: var(--text); margin-top: 2px; }
+  .del-btn { background: none; border: none; color: var(--muted); font-size: 14px; cursor: pointer; padding: 0; opacity: 0; transition: opacity 0.15s, color 0.15s; flex-shrink: 0; }
   .entry:hover .del-btn { opacity: 1; }
   .del-btn:hover { color: var(--red); }
   .entry-text { font-size: 13px; color: var(--muted); line-height: 1.7; white-space: pre-wrap; }
+  .entry-section { font-size: 10px; font-weight: 600; letter-spacing: 0.14em; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; margin-top: 10px; }
   .empty { font-size: 13px; color: #333; text-align: center; padding: 40px 0; }
-  .sync-status { font-size: 11px; color: var(--muted); text-align: right; margin-bottom: 12px; min-height: 16px; }
+  .sync-status { font-size: 11px; color: var(--muted); margin-bottom: 10px; min-height: 16px; }
 </style>
 </head>
 <body>
@@ -50,113 +64,174 @@
   <div style="width:60px"></div>
 </div>
 <div class="main">
-  <div class="label">New Entry</div>
-  <div class="add-panel">
-    <div class="add-row">
-      <input class="date-input" type="date" id="entryDate">
-    </div>
-    <textarea id="entryText" rows="5" placeholder="记录这次对话做了什么、聊了什么、有什么结论…"></textarea>
-    <div class="add-footer">
-      <button class="save-btn" id="addBtn" onclick="addEntry()">ADD</button>
-    </div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('handoff')">HANDOFF</button>
+    <button class="tab-btn" onclick="switchTab('journal')">JOURNAL</button>
   </div>
 
-  <div class="label">Records</div>
-  <div class="sync-status" id="syncStatus"></div>
-  <div class="entries" id="entriesList"><div class="empty">暂无记录</div></div>
+  <!-- HANDOFF TAB -->
+  <div class="tab-panel active" id="tab-handoff">
+    <div class="label">New Handoff</div>
+    <div class="add-panel">
+      <div class="field">
+        <label class="field-label">Date</label>
+        <input type="date" id="h-date">
+      </div>
+      <div class="field">
+        <label class="field-label">This session — what we did</label>
+        <textarea id="h-did" rows="3" placeholder="这次对话做了什么、聊了什么…"></textarea>
+      </div>
+      <div class="field">
+        <label class="field-label">Left off — where to continue</label>
+        <textarea id="h-next" rows="3" placeholder="下次从哪里继续、还有什么没做完…"></textarea>
+      </div>
+      <div class="add-footer">
+        <button class="btn" id="h-add-btn" onclick="addHandoff()">ADD</button>
+      </div>
+    </div>
+    <div class="label">Records</div>
+    <div class="sync-status" id="h-status"></div>
+    <div class="entries" id="handoff-list"><div class="empty">暂无记录</div></div>
+  </div>
+
+  <!-- JOURNAL TAB -->
+  <div class="tab-panel" id="tab-journal">
+    <div class="label">New Entry</div>
+    <div class="add-panel">
+      <div class="field">
+        <label class="field-label">Date</label>
+        <input type="date" id="j-date">
+      </div>
+      <div class="field">
+        <label class="field-label">Content</label>
+        <textarea id="j-text" rows="6" placeholder="今天发生了什么、想记录什么…"></textarea>
+      </div>
+      <div class="add-footer">
+        <button class="btn" id="j-add-btn" onclick="addJournal()">ADD</button>
+      </div>
+    </div>
+    <div class="label">Records</div>
+    <div class="sync-status" id="j-status"></div>
+    <div class="entries" id="journal-list"><div class="empty">暂无记录</div></div>
+  </div>
 </div>
 
 <script>
-const OWNER = 'webkit1005-collab';
-const REPO = 'context-handoff';
-const API = 'https://api.github.com';
+const OWNER = 'webkit1005-collab', REPO = 'context-handoff', API = 'https://api.github.com';
 const PATH = 'data/memories.json';
-
 function getToken() { return localStorage.getItem('ch_token'); }
-function status(msg) { document.getElementById('syncStatus').textContent = msg; }
 
-let memories = [];
+let data = { handoffs: [], journal: [] };
 let fileSha = null;
 
 const today = new Date().toISOString().slice(0,10);
-document.getElementById('entryDate').value = today;
+document.getElementById('h-date').value = today;
+document.getElementById('j-date').value = today;
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', ['handoff','journal'][i] === name));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-'+name));
+}
+
+function setStatus(id, msg) { document.getElementById(id).textContent = msg; }
 
 async function load() {
   const t = getToken();
-  if (!t) { status('未设置 Token，请先在首页配置'); return; }
-  status('加载中…');
+  if (!t) { setStatus('h-status','未设置 Token'); setStatus('j-status','未设置 Token'); return; }
+  setStatus('h-status','加载中…');
   try {
-    const r = await fetch(`${API}/repos/${OWNER}/${REPO}/contents/${PATH}`, {
-      headers: { Authorization: `token ${t}` }
-    });
-    if (r.status === 404) { memories = []; fileSha = null; status(''); render(); return; }
+    const r = await fetch(`${API}/repos/${OWNER}/${REPO}/contents/${PATH}`, { headers: { Authorization: `token ${t}` } });
+    if (r.status === 404) { data = { handoffs: [], journal: [] }; fileSha = null; setStatus('h-status',''); render(); return; }
     if (!r.ok) throw new Error();
     const j = await r.json();
     fileSha = j.sha;
-    memories = JSON.parse(atob(j.content.replace(/\n/g,'')));
-    status('');
+    const parsed = JSON.parse(atob(j.content.replace(/\n/g,'')));
+    data = { handoffs: parsed.handoffs || [], journal: parsed.journal || [] };
+    setStatus('h-status',''); setStatus('j-status','');
     render();
-  } catch { status('加载失败'); }
+  } catch { setStatus('h-status','加载失败'); }
 }
 
 async function persist(msg) {
-  const t = getToken();
-  if (!t) return false;
-  const body = { message: msg, content: btoa(unescape(encodeURIComponent(JSON.stringify(memories, null, 2)))) };
+  const t = getToken(); if (!t) return false;
+  const body = { message: msg, content: btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2)))) };
   if (fileSha) body.sha = fileSha;
   const r = await fetch(`${API}/repos/${OWNER}/${REPO}/contents/${PATH}`, {
-    method: 'PUT',
-    headers: { Authorization: `token ${t}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
+    method: 'PUT', headers: { Authorization: `token ${t}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body)
   });
   if (r.ok) { const j = await r.json(); fileSha = j.content.sha; return true; }
   return false;
 }
 
-async function addEntry() {
-  const text = document.getElementById('entryText').value.trim();
-  const date = document.getElementById('entryDate').value;
-  if (!text) return;
-  const btn = document.getElementById('addBtn');
+async function addHandoff() {
+  const did = document.getElementById('h-did').value.trim();
+  const next = document.getElementById('h-next').value.trim();
+  const date = document.getElementById('h-date').value;
+  if (!did && !next) return;
+  const btn = document.getElementById('h-add-btn');
   btn.disabled = true; btn.textContent = '…';
-  memories.unshift({ id: Date.now(), date, summary: text });
-  status('保存中…');
-  const ok = await persist('add memory entry');
+  data.handoffs.unshift({ id: Date.now(), date, did, next });
+  setStatus('h-status','保存中…');
+  const ok = await persist('add handoff');
   if (ok) {
-    document.getElementById('entryText').value = '';
-    document.getElementById('entryDate').value = today;
-    status('');
+    document.getElementById('h-did').value = '';
+    document.getElementById('h-next').value = '';
+    setStatus('h-status','');
     btn.textContent = 'ADDED'; btn.classList.add('success');
     setTimeout(() => { btn.textContent = 'ADD'; btn.classList.remove('success'); btn.disabled = false; }, 1200);
     render();
-  } else {
-    memories.shift();
-    status('保存失败');
-    btn.textContent = 'ADD'; btn.disabled = false;
-  }
+  } else { data.handoffs.shift(); setStatus('h-status','保存失败'); btn.textContent = 'ADD'; btn.disabled = false; }
 }
 
-async function deleteEntry(id) {
-  const idx = memories.findIndex(m => m.id === id);
+async function addJournal() {
+  const text = document.getElementById('j-text').value.trim();
+  const date = document.getElementById('j-date').value;
+  if (!text) return;
+  const btn = document.getElementById('j-add-btn');
+  btn.disabled = true; btn.textContent = '…';
+  data.journal.unshift({ id: Date.now(), date, text });
+  setStatus('j-status','保存中…');
+  const ok = await persist('add journal entry');
+  if (ok) {
+    document.getElementById('j-text').value = '';
+    setStatus('j-status','');
+    btn.textContent = 'ADDED'; btn.classList.add('success');
+    setTimeout(() => { btn.textContent = 'ADD'; btn.classList.remove('success'); btn.disabled = false; }, 1200);
+    render();
+  } else { data.journal.shift(); setStatus('j-status','保存失败'); btn.textContent = 'ADD'; btn.disabled = false; }
+}
+
+async function delEntry(type, id) {
+  const arr = data[type];
+  const idx = arr.findIndex(x => x.id === id);
   if (idx === -1) return;
-  const removed = memories.splice(idx, 1)[0];
-  status('删除中…');
-  const ok = await persist('delete memory entry');
-  if (ok) { status(''); render(); }
-  else { memories.splice(idx, 0, removed); status('删除失败'); render(); }
+  const removed = arr.splice(idx, 1)[0];
+  const ok = await persist('delete entry');
+  if (!ok) { arr.splice(idx, 0, removed); }
+  render();
 }
 
 function render() {
-  const el = document.getElementById('entriesList');
-  if (!memories.length) { el.innerHTML = '<div class="empty">暂无记录</div>'; return; }
-  el.innerHTML = memories.map(m => `
+  const hl = document.getElementById('handoff-list');
+  hl.innerHTML = data.handoffs.length ? data.handoffs.map(h => `
     <div class="entry">
       <div class="entry-header">
-        <div class="entry-date">${m.date}</div>
-        <button class="del-btn" onclick="deleteEntry(${m.id})">×</button>
+        <div class="entry-meta"><div class="entry-date">${h.date}</div></div>
+        <button class="del-btn" onclick="delEntry('handoffs',${h.id})">×</button>
       </div>
-      <div class="entry-text">${m.summary.replace(/</g,'&lt;')}</div>
-    </div>`).join('');
+      ${h.did ? `<div class="entry-section">This session</div><div class="entry-text">${h.did.replace(/</g,'&lt;')}</div>` : ''}
+      ${h.next ? `<div class="entry-section">Left off</div><div class="entry-text">${h.next.replace(/</g,'&lt;')}</div>` : ''}
+    </div>`).join('') : '<div class="empty">暂无记录</div>';
+
+  const jl = document.getElementById('journal-list');
+  jl.innerHTML = data.journal.length ? data.journal.map(j => `
+    <div class="entry">
+      <div class="entry-header">
+        <div class="entry-meta"><div class="entry-date">${j.date}</div></div>
+        <button class="del-btn" onclick="delEntry('journal',${j.id})">×</button>
+      </div>
+      <div class="entry-text">${j.text.replace(/</g,'&lt;')}</div>
+    </div>`).join('') : '<div class="empty">暂无记录</div>';
 }
 
 load();
