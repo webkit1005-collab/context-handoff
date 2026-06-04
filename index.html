@@ -110,21 +110,19 @@
 
   <div class="label">Claude Context</div>
   <div class="panel">
-    <div class="panel-top">
-      <div class="pills">
-        <button class="pill active" id="pill-profile" onclick="togglePill('profile')">Profile</button>
-        <button class="pill active" id="pill-todos" onclick="togglePill('todos')">Todos</button>
-        <button class="pill active" id="pill-memory" onclick="togglePill('memory')">Memory</button>
-      </div>
-      <button class="btn" id="copyBtn" onclick="copyContext()">COPY</button>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">
+      <span class="dot" id="statusDot" style="background:var(--muted)"></span>
+      <span id="statusText">加载中…</span>
     </div>
-    <div class="status-row">
-      <span style="font-size:11px;color:var(--muted)">
-        <span class="dot" id="statusDot" style="background:var(--muted)"></span>
-        <span id="statusText">加载中…</span>
-      </span>
+    <div class="pills" style="margin-bottom:14px">
+      <button class="pill active" id="pill-profile" onclick="togglePill('profile')">Profile</button>
+      <button class="pill active" id="pill-todos" onclick="togglePill('todos')">Todos</button>
+      <button class="pill active" id="pill-memory" onclick="togglePill('memory')">Memory</button>
     </div>
     <div class="context-box" id="contextBox"></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:12px">
+      <button class="btn" id="copyBtn" onclick="copyContext()">COPY</button>
+    </div>
   </div>
 </div>
 
