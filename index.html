@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CONTEXT HANDOFF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -11,9 +13,9 @@
     --bg: #0d0d0f; --surface: #161618; --surface2: #1e1e21;
     --border: #2a2a2e; --text: #e8e8ea; --muted: #666;
     --accent: #7c6ef5; --accent-dim: rgba(124,110,245,0.12);
-    --green: #4ade80; --red: #f87171; --amber: #fbbf24;
+    --green: #4ade80; --red: #f87171;
   }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 40px 24px; }
+  body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 40px 24px; }
   .header { max-width: 900px; margin: 0 auto 48px; display: flex; justify-content: space-between; align-items: flex-end; }
   .site-title { font-size: 11px; font-weight: 600; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; }
   .clock { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -27,21 +29,27 @@
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; text-decoration: none; color: inherit; transition: border-color 0.15s, background 0.15s; display: flex; flex-direction: column; }
   .card:hover { border-color: var(--accent); background: var(--surface2); }
   .card-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--accent-dim); display: flex; align-items: center; justify-content: center; margin-bottom: 14px; font-size: 15px; flex-shrink: 0; }
-  .card-icon.amber { background: rgba(251,191,36,0.1); }
   .card-name { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 6px; }
   .card-desc { font-size: 12px; color: var(--muted); line-height: 1.5; flex: 1; }
   .card-meta { margin-top: 14px; font-size: 11px; color: #444; min-height: 16px; }
 
-  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 16px; }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; }
   .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .panel-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+
+  .pills { display: flex; gap: 6px; flex-wrap: wrap; }
+  .pill { font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; padding: 5px 13px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .pill:not(.active):hover { border-color: var(--accent); color: var(--accent); }
+
   .btn { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 7px 14px; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
   .btn:hover { opacity: 0.85; }
   .btn.success { background: var(--green); color: #000; }
   .btn.secondary { background: transparent; border: 1px solid var(--border); color: var(--muted); }
   .btn.secondary:hover { border-color: var(--red); color: var(--red); opacity: 1; }
-  .context-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; font-size: 12px; color: var(--muted); line-height: 1.7; white-space: pre-wrap; max-height: 200px; overflow-y: auto; font-family: monospace; }
+  .context-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; font-size: 13px; color: var(--muted); line-height: 1.7; white-space: pre-wrap; max-height: 220px; overflow-y: auto; font-family: inherit; }
+  .status-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
   .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 6px; }
-  .dot.green { background: var(--green); box-shadow: 0 0 6px var(--green); }
 
   .setup-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
   .setup-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; width: 100%; max-width: 420px; }
@@ -57,7 +65,7 @@
 <div class="setup-overlay" id="setupOverlay" style="display:none">
   <div class="setup-box">
     <div class="setup-title">GitHub Token</div>
-    <div class="setup-desc">需要一个 GitHub Personal Access Token 来读写数据。只需输入一次，存在本地浏览器里。Token 需要有 <code>repo</code> 权限。</div>
+    <div class="setup-desc">需要一个 GitHub Personal Access Token 来读写数据。只需输入一次，存在本地浏览器里。Token 需要有 repo 权限。</div>
     <input class="setup-input" id="tokenInput" type="password" placeholder="ghp_xxxxxxxxxxxx">
     <div class="setup-actions"><button class="btn" onclick="saveToken()">SAVE</button></div>
   </div>
@@ -102,26 +110,82 @@
 
   <div class="label">Claude Context</div>
   <div class="panel">
-    <div class="panel-header">
-      <span style="font-size:12px;color:var(--muted)"><span class="dot" id="statusDot" style="background:var(--muted)"></span><span id="statusText">加载中…</span></span>
+    <div class="panel-top">
+      <div class="pills">
+        <button class="pill active" id="pill-profile" onclick="togglePill('profile')">Profile</button>
+        <button class="pill active" id="pill-todos" onclick="togglePill('todos')">Todos</button>
+        <button class="pill active" id="pill-memory" onclick="togglePill('memory')">Memory</button>
+      </div>
       <button class="btn" id="copyBtn" onclick="copyContext()">COPY</button>
     </div>
-    <div class="context-box" id="contextBox">正在加载...</div>
+    <div class="status-row">
+      <span style="font-size:11px;color:var(--muted)">
+        <span class="dot" id="statusDot" style="background:var(--muted)"></span>
+        <span id="statusText">加载中…</span>
+      </span>
+    </div>
+    <div class="context-box" id="contextBox"></div>
   </div>
 </div>
 
 <script>
 const OWNER = 'webkit1005-collab', REPO = 'context-handoff', API = 'https://api.github.com';
+const CACHE_KEY = 'ch_index_cache', TOGGLE_KEY = 'ch_context_toggles';
+
 function getToken() { return localStorage.getItem('ch_token'); }
 function saveToken() { const t = document.getElementById('tokenInput').value.trim(); if (!t) return; localStorage.setItem('ch_token', t); document.getElementById('setupOverlay').style.display = 'none'; init(); }
 function resetToken() { localStorage.removeItem('ch_token'); document.getElementById('tokenInput').value = ''; document.getElementById('setupOverlay').style.display = 'flex'; }
 function clock() { document.getElementById('clock').textContent = new Date().toLocaleTimeString('zh-CN', {hour12:false}); }
 setInterval(clock, 1000); clock();
 
+let toggles = { profile: true, todos: true, memory: true };
+let cachedProfile = null, cachedTodos = null, cachedMemories = null;
+
+function loadToggles() {
+  const saved = localStorage.getItem(TOGGLE_KEY);
+  if (saved) { try { toggles = JSON.parse(saved); } catch {} }
+  ['profile','todos','memory'].forEach(k => {
+    document.getElementById('pill-'+k).classList.toggle('active', toggles[k]);
+  });
+}
+
+function togglePill(name) {
+  toggles[name] = !toggles[name];
+  document.getElementById('pill-'+name).classList.toggle('active', toggles[name]);
+  localStorage.setItem(TOGGLE_KEY, JSON.stringify(toggles));
+  renderContext();
+}
+
+function renderContext() {
+  const parts = [];
+  if (toggles.profile && cachedProfile && cachedProfile.summary) {
+    parts.push(cachedProfile.summary);
+    document.getElementById('profile-meta').textContent = '已加载';
+  }
+  if (toggles.todos && cachedTodos) {
+    const active = (cachedTodos.topics||[]).filter(t => !t.done);
+    if (active.length) {
+      parts.push(active.map(t => '• ' + t.text + (t.ddl ? '  [DDL ' + t.ddl + ']' : '')).join('\n'));
+    }
+    document.getElementById('todo-meta').textContent = active.length ? active.length + ' 条未完成' : '';
+  }
+  if (toggles.memory && cachedMemories) {
+    const latest = (cachedMemories.handoffs||[])[0];
+    if (latest && latest.content) parts.push(latest.content);
+    const total = (cachedMemories.handoffs||[]).length + (cachedMemories.journal||[]).length;
+    document.getElementById('mem-meta').textContent = total ? total + ' 条记录' : '';
+  }
+  const result = parts.join('\n\n');
+  document.getElementById('contextBox').textContent = result || '（暂无数据，请先填写各模块）';
+  localStorage.setItem(CACHE_KEY, JSON.stringify({ profile: cachedProfile, todos: cachedTodos, memories: cachedMemories }));
+  document.getElementById('statusDot').style.cssText = 'background:var(--green);box-shadow:0 0 6px var(--green)';
+  document.getElementById('statusText').textContent = 'Ready to copy';
+}
+
 async function fetchJSON(path) {
   const t = getToken(); if (!t) return null;
   try {
-    const r = await fetch(`${API}/repos/${OWNER}/${REPO}/contents/data/${path}`, { headers: { Authorization: `token ${t}` } });
+    const r = await fetch(API + '/repos/' + OWNER + '/' + REPO + '/contents/data/' + path, { headers: { Authorization: 'token ' + t } });
     if (!r.ok) return null;
     const j = await r.json();
     return JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,'')))));
@@ -131,47 +195,40 @@ async function fetchJSON(path) {
 async function fetchTodos() {
   const t = getToken(); if (!t) return null;
   try {
-    const r = await fetch(API + "/repos/webkit1005-collab/todolist-data/contents/state.json", { headers: { Authorization: "token " + t } });
+    const r = await fetch(API + '/repos/webkit1005-collab/todolist-data/contents/state.json', { headers: { Authorization: 'token ' + t } });
     if (!r.ok) return null;
     const j = await r.json();
     return JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,'')))));
   } catch { return null; }
 }
+
 async function buildContext() {
-  const cached = localStorage.getItem('ch_index_cache');
+  const cached = localStorage.getItem(CACHE_KEY);
   if (cached) {
-    document.getElementById('contextBox').textContent = cached;
-    document.getElementById('statusDot').style.cssText = 'background:var(--green);box-shadow:0 0 6px var(--green)';
-    document.getElementById('statusText').textContent = 'Ready to copy';
+    try {
+      const c = JSON.parse(cached);
+      cachedProfile = c.profile; cachedTodos = c.todos; cachedMemories = c.memories;
+      renderContext();
+    } catch {}
   }
   const [todos, memories, profile] = await Promise.all([fetchTodos(), fetchJSON('memories.json'), fetchJSON('profile.json')]);
-  let parts = [];
-  const today = new Date().toLocaleDateString('zh-CN');
-  parts.push(`[CONTEXT HANDOFF — ${today}]`);
-  if (profile) { parts.push(`\n[PROFILE]\n${profile.summary||''}`); document.getElementById('profile-meta').textContent = '已加载'; }
-  if (todos) { const active=(todos.topics||[]).filter(t=>!t.done); parts.push(`\n[TODOS — ${active.length} 条未完成]\n`+active.map(t=>`• ${t.text}${t.ddl?' [DDL:'+t.ddl+']':''}`).join('\n')); document.getElementById('todo-meta').textContent=`${active.length} 条未完成`; }
-  if (memories) {
-    const handoffs = (memories.handoffs||[]).slice(0,2);
-    if (handoffs.length) parts.push(`\n[LAST HANDOFF]\n`+handoffs.map(h=>`[${h.date}] ${h.content||''}`).join('\n'));
-    const total = (memories.handoffs||[]).length + (memories.journal||[]).length;
-    document.getElementById('mem-meta').textContent = total ? `${total} 条记录` : '';
-  }
-  if (parts.length===1) parts.push('\n（暂无数据，请先填写各模块）');
-  const result = parts.join('');
-  document.getElementById('contextBox').textContent = result;
-  localStorage.setItem('ch_index_cache', result);
-  document.getElementById('statusDot').style.cssText = 'background:var(--green);box-shadow:0 0 6px var(--green)';
-  document.getElementById('statusText').textContent = 'Ready to copy';
+  cachedTodos = todos; cachedMemories = memories; cachedProfile = profile;
+  renderContext();
 }
 
 function copyContext() {
-  navigator.clipboard.writeText(document.getElementById('contextBox').textContent);
+  const text = document.getElementById('contextBox').textContent;
+  navigator.clipboard.writeText(text);
   const btn = document.getElementById('copyBtn');
-  btn.textContent='COPIED'; btn.classList.add('success');
-  setTimeout(()=>{btn.textContent='COPY';btn.classList.remove('success');},1500);
+  btn.textContent = 'COPIED'; btn.classList.add('success');
+  setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('success'); }, 1500);
 }
 
-function init() { if (!getToken()) { document.getElementById('setupOverlay').style.display='flex'; return; } buildContext(); }
+function init() {
+  if (!getToken()) { document.getElementById('setupOverlay').style.display = 'flex'; return; }
+  loadToggles();
+  buildContext();
+}
 init();
 </script>
 </body>
