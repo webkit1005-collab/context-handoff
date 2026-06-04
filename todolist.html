@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TODOLIST — Context Handoff</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap');
+  :root {
+    --bg: #0a0c10; --surface: #111318; --border: #1e2330; --border2: #252c3a;
+    --blue: #4a8fff; --blue-dim: #1e3a6e; --blue-glow: rgba(74,143,255,0.10);
+    --white: #eef0f5; --muted: #4a5068; --muted2: #6b7494;
+    --card-bg: #2c2e3a; --card-bg-done: #222430; --card-text: #dde3ef; --card-meta: #6b7494;
+    --urgent: #ff7040; --urgent-bg: rgba(255,112,64,0.10); --stats-bg: #24262f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--white); font-family: 'DM Sans', sans-serif; min-height: 100vh; padding: 48px 24px 80px; font-size: 18px; }
+  .wrap { max-width: 540px; margin: 0 auto; }
+  .nav-back { font-size: 11px; color: var(--muted2); text-decoration: none; letter-spacing: 0.1em; display: inline-block; margin-bottom: 28px; }
+  .nav-back:hover { color: var(--white); }
+  .top { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 32px; }
+  .title-block h1 { font-size: 32px; font-weight: 500; color: var(--white); letter-spacing: -0.02em; }
+  .title-block p { font-size: 15px; color: var(--muted2); margin-top: 5px; }
+  .date-block { text-align: right; line-height: 1; }
+  .date-display { font-size: 30px; font-weight: 500; color: var(--blue); letter-spacing: -0.01em; }
+  .time-display { font-size: 14px; color: var(--muted2); margin-top: 5px; }
+  .list-tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+  .tab { font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 0.06em; padding: 7px 16px; border: 1px solid var(--border2); border-radius: 6px; background: transparent; color: var(--muted2); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .tab.active { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .tab:not(.active):hover { border-color: var(--blue); color: var(--blue); }
+  .tab.add-list { border-style: dashed; color: var(--muted); font-size: 16px; padding: 4px 10px; line-height: 1; }
+  .tab.add-list:hover { border-color: var(--blue); color: var(--blue); }
+  .input-area { margin-bottom: 28px; }
+  .input-row { display: flex; border: 1px solid var(--border2); border-radius: 10px; background: var(--surface); overflow: hidden; transition: border-color 0.2s, box-shadow 0.2s; margin-bottom: 8px; }
+  .input-row:focus-within { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-glow); }
+  .input-row input { flex: 1; background: transparent; border: none; color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 16px; padding: 14px 16px; outline: none; }
+  .input-row input::placeholder { color: var(--muted); }
+  .input-row button { background: var(--blue); color: #fff; border: none; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; letter-spacing: 0.06em; padding: 0 22px; cursor: pointer; transition: opacity 0.15s; white-space: nowrap; }
+  .input-row button:hover { opacity: 0.85; }
+  .extra-row { display: flex; gap: 8px; align-items: stretch; }
+  .extra-row input[type="text"] { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 9px 12px; outline: none; transition: border-color 0.2s; }
+  .extra-row input[type="text"]:focus { border-color: var(--blue); }
+  .extra-row input[type="text"]::placeholder { color: var(--muted); }
+  .extra-row input[type="date"] { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--muted2); font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 9px 10px; outline: none; cursor: pointer; transition: border-color 0.2s; }
+  .extra-row input[type="date"]:focus { border-color: var(--blue); }
+  .prio-select { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--muted2); font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 9px 10px; outline: none; cursor: pointer; transition: border-color 0.2s; }
+  .prio-select:focus { border-color: var(--blue); }
+  .prompt-box { background: var(--blue-glow); border: 1px solid var(--blue-dim); border-radius: 10px; padding: 18px; margin-bottom: 28px; display: none; }
+  .plabel { font-family: 'DM Sans', sans-serif; font-size: 14px; letter-spacing: 0.08em; color: var(--blue); text-transform: uppercase; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+  .prompt-text { font-size: 14px; color: var(--muted2); line-height: 1.7; white-space: pre-wrap; word-break: break-all; }
+  .copy-btn { background: transparent; border: 1px solid var(--blue-dim); color: var(--blue); font-family: 'DM Sans', sans-serif; font-size: 9px; letter-spacing: 0.1em; padding: 4px 10px; cursor: pointer; text-transform: uppercase; transition: all 0.15s; }
+  .copy-btn:hover { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .section { margin-bottom: 24px; }
+  .sec-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .sec-label { font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 0.14em; color: var(--muted2); text-transform: uppercase; }
+  .sec-count { font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--blue); background: var(--blue-glow); padding: 2px 10px; border-radius: 4px; }
+  .clear-btn { background: transparent; border: none; font-family: 'DM Sans', sans-serif; font-size: 9px; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; cursor: pointer; transition: color 0.15s; }
+  .clear-btn:hover { color: #ff6060; }
+  .topic-item { background: var(--card-bg); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 14px 16px; margin-bottom: 8px; display: flex; align-items: flex-start; gap: 12px; animation: fadeSlide 0.2s ease; transition: background 0.2s; }
+  .topic-item.urgent { border-left: 3px solid var(--urgent); background: var(--urgent-bg); }
+  @keyframes fadeSlide { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+  .topic-item:hover { background: rgba(220,228,242,0.16); }
+  .topic-item.done { background: var(--card-bg-done); opacity: 0.5; }
+  .topic-item.done .topic-text { text-decoration: line-through; color: var(--muted); }
+  .check { width: 17px; height: 17px; border: 2px solid var(--muted); background: transparent; cursor: pointer; flex-shrink: 0; margin-top: 3px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .check:hover { border-color: var(--blue); }
+  .check.on { background: var(--blue); border-color: var(--blue); }
+  .check.on::after { content: ''; width: 5px; height: 5px; background: #fff; border-radius: 50%; display: block; }
+  .topic-body { flex: 1; min-width: 0; }
+  .topic-text { font-size: 18px; line-height: 1.5; color: var(--card-text); word-break: break-all; }
+  .topic-note { font-size: 15px; color: var(--muted2); margin-top: 4px; line-height: 1.4; }
+  .topic-meta { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--card-meta); margin-top: 6px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .ddl-tag { font-family: 'DM Sans', sans-serif; font-size: 11px; padding: 2px 8px; border-radius: 6px; background: var(--blue-glow); color: var(--blue); border: 1px solid var(--blue-dim); }
+  .ddl-tag.near { background: var(--urgent-bg); color: var(--urgent); border-color: rgba(255,96,96,0.3); }
+  .urgent-badge { font-family: 'DM Sans', sans-serif; font-size: 11px; padding: 2px 8px; border-radius: 6px; background: var(--urgent-bg); color: var(--urgent); border: 1px solid rgba(255,96,96,0.3); }
+  .topic-actions { display: flex; gap: 6px; opacity: 0; transition: opacity 0.15s; flex-shrink: 0; }
+  .topic-item:hover .topic-actions { opacity: 1; }
+  .act-btn { background: transparent; border: none; color: var(--muted); font-size: 14px; cursor: pointer; transition: color 0.15s; padding: 0 2px; line-height: 1; }
+  .act-btn:hover { color: #ff6060; }
+  .act-btn.edit:hover { color: var(--blue); }
+  .modal select, .modal input[type="date"] { width: 100%; background: var(--surface); border: 1px solid var(--border2); border-radius: 8px; color: var(--muted2); font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 10px 12px; outline: none; margin-bottom: 12px; cursor: pointer; transition: border-color 0.2s; }
+  .modal select:focus, .modal input[type="date"]:focus { border-color: var(--blue); }
+  .modal-row { display: flex; gap: 8px; }
+  .modal-row select, .modal-row input[type="date"] { flex: 1; }
+  .empty { font-size: 13px; color: var(--muted); text-align: center; padding: 24px 0; font-style: italic; }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+  .stats-bar { display: flex; gap: 0; margin-bottom: 32px; background: var(--stats-bg); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; align-items: stretch; overflow: hidden; }
+  .stat { flex: 1; padding: 20px 24px; border-right: 1px solid rgba(255,255,255,0.07); }
+  .stat:last-of-type { border-right: none; }
+  .stat-h { display: flex; align-items: center; gap: 14px; }
+  .stat-h .stat-label { margin-top: 0; }
+  .stat-num { font-family: 'DM Sans', sans-serif; font-size: 38px; color: var(--blue); font-weight: 500; line-height: 1; flex-shrink: 0; }
+  .stat-label { font-family: 'DM Sans', sans-serif; font-size: 14px; letter-spacing: 0.06em; color: var(--muted2); text-transform: uppercase; margin-top: 8px; line-height: 1.3; }
+  .stat-h .stat-num { font-size: 48px; }
+  .stat-h .stat-label { font-size: 16px; }
+  .stat-alert { flex: 0 0 auto; padding: 20px 20px; }
+  .stat-alert .stat-num { font-size: 30px; color: var(--urgent); }
+  .stat-alert .stat-label { font-size: 12px; color: var(--urgent); margin-top: 6px; }
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; }
+  .modal-bg.show { display: flex; }
+  .modal { background: #141720; border: 1px solid var(--border2); border-radius: 14px; padding: 26px; width: 340px; max-width: 90vw; }
+  .modal h3 { font-size: 14px; font-weight: 500; margin-bottom: 16px; color: var(--white); }
+  .modal input { width: 100%; background: var(--surface); border: 1px solid var(--border2); color: var(--white); font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 10px 12px; outline: none; margin-bottom: 12px; transition: border-color 0.2s; }
+  .modal input:focus { border-color: var(--blue); }
+  .modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
+  .modal-btns button { font-family: 'DM Sans', sans-serif; font-size: 12px; letter-spacing: 0.06em; padding: 9px 18px; border-radius: 7px; cursor: pointer; border: none; transition: opacity 0.15s; }
+  .btn-cancel { background: var(--surface); color: var(--muted2); border: 1px solid var(--border2) !important; }
+  .btn-confirm { background: var(--blue); color: #fff; }
+  .btn-cancel:hover, .btn-confirm:hover { opacity: 0.85; }
+  .tab-wrap { position: relative; display: inline-flex; }
+  .tab-del { position: absolute; right: -5px; top: -5px; width: 15px; height: 15px; border-radius: 50%; background: #ff5050; color: #fff; font-size: 9px; border: none; cursor: pointer; display: none; align-items: center; justify-content: center; padding: 0; z-index: 1; }
+  .tab-wrap:hover .tab-del { display: flex; }
+  .tab.drag-over { background: var(--blue) !important; border-color: var(--blue) !important; color: #fff !important; }
+  .sync-status { font-size: 11px; color: var(--muted); text-align: right; margin-top: 3px; min-height: 14px; }
+  .prompt-chevron { font-size: 11px; color: var(--muted2); transition: transform 0.2s; margin-left: 6px; display: inline-block; }
+  .prompt-chevron.open { transform: rotate(180deg); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="nav-back" href="index.html">← BACK</a>
+
+  <div class="top">
+    <div class="title-block">
+      <h1>#TODOlist</h1>
+      <p>每次新对话开始，把未完成的带进去</p>
+    </div>
+    <div class="date-block">
+      <div class="date-display" id="dateDisplay"></div>
+      <div class="time-display" id="timeDisplay"></div>
+      <div class="sync-status" id="syncStatus"></div>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat stat-h"><div class="stat-num" id="sTodo">0</div><div class="stat-label">待捡起</div></div>
+    <div class="stat stat-h"><div class="stat-num" id="sDone">0</div><div class="stat-label">已完成</div></div>
+    <div class="stat stat-alert" id="sAlert" style="display:none"></div>
+  </div>
+
+  <div class="list-tabs" id="listTabs"></div>
+
+  <div class="input-area">
+    <div class="input-row">
+      <input type="text" id="inp" placeholder="没说完的事、想聊的话题…" maxlength="200">
+      <button onclick="add()">加入</button>
+    </div>
+    <div class="extra-row">
+      <input type="text" id="noteInp" placeholder="备注（可选）" maxlength="100">
+      <input type="date" id="ddlInp" title="DDL">
+      <select class="prio-select" id="prioInp">
+        <option value="normal">普通</option>
+        <option value="urgent">紧急</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="prompt-box" id="promptBox">
+    <div class="plabel" onclick="togglePrompt()">
+      <span>Session 开头插入 <span id="promptCount" style="opacity:0.55;font-size:12px"></span><span class="prompt-chevron" id="promptChevron">▼</span></span>
+      <button class="copy-btn" id="promptCopyBtn" onclick="event.stopPropagation();copyP()" style="display:none">复制</button>
+    </div>
+    <div class="prompt-text" id="promptText" style="display:none;margin-top:12px"></div>
+  </div>
+
+  <div class="section">
+    <div class="sec-header">
+      <span class="sec-label">待捡起</span>
+      <span class="sec-count" id="pendCount">0</span>
+    </div>
+    <div id="pendList"></div>
+  </div>
+  <hr class="divider">
+  <div class="section">
+    <div class="sec-header">
+      <span class="sec-label">已完成</span>
+      <button class="clear-btn" onclick="clearDone()">清空</button>
+    </div>
+    <div id="doneList"></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="editModalBg">
+  <div class="modal">
+    <h3>编辑</h3>
+    <input type="text" id="editText" placeholder="话题" maxlength="200">
+    <input type="text" id="editNote" placeholder="备注（可选）" maxlength="100">
+    <div class="modal-row">
+      <input type="date" id="editDdl">
+      <select id="editPrio"><option value="normal">普通</option><option value="urgent">紧急</option></select>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeEditModal()">取消</button>
+      <button class="btn-confirm" onclick="saveEdit()">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3>新建 List</h3>
+    <input type="text" id="listNameInp" placeholder="列表名称，如：学习、生活…" maxlength="20">
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-confirm" onclick="confirmAddList()">创建</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const GH = {
+    get token() { return localStorage.getItem('ch_token') || ''; },
+    repo: 'webkit1005-collab/todolist-data',
+    file: 'state.json',
+    sha: null,
+    url() { return `https://api.github.com/repos/${this.repo}/contents/${this.file}`; }
+  };
+
+  let state = { lists: ['全部', '学习', '生活', 'vibecoding'], activeList: '全部', topics: [] };
+
+  function syncStatus(msg) { const el = document.getElementById('syncStatus'); if (el) el.textContent = msg; }
+
+  async function cloudLoad() {
+    try {
+      const res = await fetch(GH.url(), { headers: { Authorization: `token ${GH.token}`, Accept: 'application/vnd.github.v3+json' } });
+      if (!res.ok) return null;
+      const data = await res.json();
+      GH.sha = data.sha;
+      return JSON.parse(decodeURIComponent(escape(atob(data.content.replace(/\n/g,'')))));
+    } catch(e) { return null; }
+  }
+
+  let saveTimer = null;
+  async function fetchSha() {
+    const res = await fetch(GH.url() + '?t=' + Date.now(), { headers: { Authorization: `token ${GH.token}`, Accept: 'application/vnd.github.v3+json' } });
+    if (res.ok) { const d = await res.json(); GH.sha = d.sha; } else { GH.sha = null; }
+  }
+  async function putState() {
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(state))));
+    const body = { message: 'sync', content };
+    if (GH.sha) body.sha = GH.sha;
+    return fetch(GH.url(), { method: 'PUT', headers: { Authorization: `token ${GH.token}`, 'Content-Type': 'application/json', Accept: 'application/vnd.github.v3+json' }, body: JSON.stringify(body) });
+  }
+  async function cloudSave() {
+    syncStatus('同步中…');
+    try {
+      await fetchSha();
+      let res = await putState();
+      if (res.status === 409) { await fetchSha(); res = await putState(); }
+      if (res.ok) { const data = await res.json(); GH.sha = data.content?.sha; syncStatus('已同步 ✓'); setTimeout(() => syncStatus(''), 2000); }
+      else { syncStatus('同步失败'); }
+    } catch(e) { syncStatus('同步失败'); }
+  }
+
+  const save = () => { localStorage.setItem('tq4', JSON.stringify(state)); clearTimeout(saveTimer); saveTimer = setTimeout(cloudSave, 800); };
+  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const fmt = ts => { if (!ts) return ''; const d = new Date(ts); return `${d.getMonth()+1}/${d.getDate()} ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`; };
+  const fmtDate = s => s ? s.replace(/-/g, '/').slice(5) : '';
+  const isNearDdl = ddl => { if (!ddl) return false; const diff = new Date(ddl) - new Date(); return diff > 0 && diff < 3 * 24 * 3600 * 1000; };
+  const isPastDdl = ddl => ddl && new Date(ddl) < new Date();
+
+  function add() {
+    const text = document.getElementById('inp').value.trim();
+    if (!text) return;
+    const note = document.getElementById('noteInp').value.trim();
+    const ddl = document.getElementById('ddlInp').value;
+    const prio = document.getElementById('prioInp').value;
+    const list = state.activeList === '全部' ? '生活' : state.activeList;
+    state.topics.unshift({ id: Date.now(), text, note, ddl, prio, list, done: false, created: Date.now(), doneAt: null });
+    document.getElementById('inp').value = '';
+    document.getElementById('noteInp').value = '';
+    document.getElementById('ddlInp').value = '';
+    document.getElementById('prioInp').value = 'normal';
+    save(); render();
+  }
+  function toggle(id) { const it = state.topics.find(x => x.id === id); if (!it) return; it.done = !it.done; it.doneAt = it.done ? Date.now() : null; save(); render(); }
+  function del(id) { state.topics = state.topics.filter(x => x.id !== id); save(); render(); }
+  function clearDone() { const vis = visibleTopics(); const doneIds = new Set(vis.filter(x => x.done).map(x => x.id)); state.topics = state.topics.filter(x => !doneIds.has(x.id)); save(); render(); }
+  function setList(l) { state.activeList = l; save(); render(); }
+
+  let dragId = null;
+  function onDragStart(e, id) { dragId = id; e.dataTransfer.effectAllowed = 'move'; }
+  function onDragOver(e, list) { if (list === '全部') return; e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+  function onDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+  function onDrop(e, list) { e.currentTarget.classList.remove('drag-over'); if (!dragId || list === '全部') return; const t = state.topics.find(x => x.id === dragId); if (t) { t.list = list; save(); render(); } dragId = null; }
+
+  function deleteList(name) { const fallback = state.lists.find(l => l !== '全部' && l !== name) || '生活'; state.topics.forEach(t => { if (t.list === name) t.list = fallback; }); state.lists = state.lists.filter(l => l !== name); if (state.activeList === name) state.activeList = '全部'; save(); render(); }
+  function renameList(name) { const newName = prompt(`重命名「${name}」：`, name); if (!newName || newName === name) return; if (state.lists.includes(newName)) { alert('名称已存在'); return; } state.lists = state.lists.map(l => l === name ? newName : l); state.topics.forEach(t => { if (t.list === name) t.list = newName; }); if (state.activeList === name) state.activeList = newName; save(); render(); }
+
+  let promptCollapsed = true;
+  function togglePrompt() { promptCollapsed = !promptCollapsed; document.getElementById('promptText').style.display = promptCollapsed ? 'none' : 'block'; document.getElementById('promptCopyBtn').style.display = promptCollapsed ? 'none' : 'inline-block'; document.getElementById('promptChevron').classList.toggle('open', !promptCollapsed); }
+
+  let editingId = null;
+  function editTopic(id) { const t = state.topics.find(x => x.id === id); if (!t) return; editingId = id; document.getElementById('editText').value = t.text; document.getElementById('editNote').value = t.note || ''; document.getElementById('editDdl').value = t.ddl || ''; document.getElementById('editPrio').value = t.prio || 'normal'; document.getElementById('editModalBg').classList.add('show'); document.getElementById('editText').focus(); }
+  function closeEditModal() { document.getElementById('editModalBg').classList.remove('show'); editingId = null; }
+  function saveEdit() { const t = state.topics.find(x => x.id === editingId); if (!t) return closeEditModal(); const text = document.getElementById('editText').value.trim(); if (text) t.text = text; t.note = document.getElementById('editNote').value.trim(); t.ddl = document.getElementById('editDdl').value; t.prio = document.getElementById('editPrio').value; save(); render(); closeEditModal(); }
+
+  function openModal() { document.getElementById('modalBg').classList.add('show'); document.getElementById('listNameInp').focus(); }
+  function closeModal() { document.getElementById('modalBg').classList.remove('show'); document.getElementById('listNameInp').value = ''; }
+  function confirmAddList() { const name = document.getElementById('listNameInp').value.trim(); if (!name || state.lists.includes(name)) return closeModal(); state.lists.push(name); state.activeList = name; save(); render(); closeModal(); }
+
+  function copyP() { navigator.clipboard.writeText(document.getElementById('promptText').textContent).then(() => { const b = document.querySelector('.copy-btn'); b.textContent = '已复制 ✓'; setTimeout(() => b.textContent = '复制', 1600); }); }
+
+  function visibleTopics() { if (state.activeList === '全部') return state.topics; return state.topics.filter(x => x.list === state.activeList); }
+
+  function render() {
+    const all = state.topics;
+    const vis = visibleTopics();
+    const pend = vis.filter(x => !x.done);
+    const done = vis.filter(x => x.done);
+    document.getElementById('sTodo').textContent = all.filter(x=>!x.done).length;
+    document.getElementById('sDone').textContent = all.filter(x=>x.done).length;
+    const alertCount = all.filter(x=>!x.done && (x.prio==='urgent' || isNearDdl(x.ddl))).length;
+    const alertEl = document.getElementById('sAlert');
+    if (alertCount > 0) { alertEl.style.display = 'block'; alertEl.innerHTML = `<div class="stat-num">${alertCount}</div><div class="stat-label">紧急/即将到期</div>`; } else { alertEl.style.display = 'none'; }
+    document.getElementById('pendCount').textContent = pend.length;
+    document.getElementById('listTabs').innerHTML =
+      state.lists.map(l => {
+        const canEdit = l !== '全部';
+        const drag = `ondragover="onDragOver(event,'${l}')" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'${l}')"`;
+        const tab = `<button class="tab${state.activeList===l?' active':''}" onclick="setList('${l}')" ondblclick="${canEdit?`renameList('${l}')`:''}" ${drag}>${l}</button>`;
+        const del = canEdit ? `<button class="tab-del" onclick="event.stopPropagation();deleteList('${l}')">×</button>` : '';
+        return `<div class="tab-wrap">${tab}${del}</div>`;
+      }).join('') + `<button class="tab add-list" onclick="openModal()" title="新建列表">+</button>`;
+    const cardHtml = (t, isDone) => {
+      const nearDdl = isNearDdl(t.ddl); const pastDdl = isPastDdl(t.ddl);
+      return `<div class="topic-item${isDone?' done':''}${t.prio==='urgent'&&!isDone?' urgent':''}" draggable="true" ondragstart="onDragStart(event,${t.id})">
+        <div class="check${isDone?' on':''}" onclick="toggle(${t.id})"></div>
+        <div class="topic-body">
+          <div class="topic-text">${esc(t.text)}</div>
+          ${t.note ? `<div class="topic-note">${esc(t.note)}</div>` : ''}
+          <div class="topic-meta">
+            <span>${fmt(t.created)}</span>
+            ${t.prio==='urgent'&&!isDone ? `<span class="urgent-badge">紧急</span>` : ''}
+            ${t.ddl && !isDone ? `<span class="ddl-tag${nearDdl||pastDdl?' near':''}">DDL ${fmtDate(t.ddl)}${pastDdl?' ⚠':''}${nearDdl?' 快到了':''}</span>` : ''}
+            ${isDone && t.doneAt ? `<span>完成 ${fmt(t.doneAt)}</span>` : ''}
+          </div>
+        </div>
+        <div class="topic-actions">
+          <button class="act-btn edit" onclick="editTopic(${t.id})">✎</button>
+          <button class="act-btn" onclick="del(${t.id})">×</button>
+        </div>
+      </div>`;
+    };
+    document.getElementById('pendList').innerHTML = pend.length ? pend.sort((a,b) => (b.prio==='urgent'?1:0)-(a.prio==='urgent'?1:0) || a.created-b.created).map(t => cardHtml(t, false)).join('') : '<div class="empty">暂无话题</div>';
+    document.getElementById('doneList').innerHTML = done.length ? done.map(t => cardHtml(t, true)).join('') : '<div class="empty">暂无</div>';
+    const box = document.getElementById('promptBox');
+    const urgentPend = pend.filter(x => x.prio==='urgent');
+    const normalPend = pend.filter(x => x.prio!=='urgent');
+    const allPend = [...urgentPend, ...normalPend];
+    if (allPend.length > 0) {
+      box.style.display = 'block';
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,'0')}-${now.getDate().toString().padStart(2,'0')}`;
+      const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+      document.getElementById('promptCount').textContent = `(${allPend.length}条)`;
+      document.getElementById('promptText').textContent = `[#TODOlist] ${dateStr} ${timeStr}\n以下是我们上次没说完的话题，请在对话中自然地捡起：\n\n` + allPend.map((t,i) => `${i+1}. ${t.prio==='urgent'?'[紧急] ':''}${t.text}${t.note?' ('+t.note+')':''}${t.ddl?' DDL:'+t.ddl:''}`).join('\n');
+    } else { box.style.display = 'none'; }
+  }
+
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('dateDisplay').textContent = `${now.getMonth()+1}/${now.getDate()}`;
+    document.getElementById('timeDisplay').textContent = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+  }
+  updateClock(); setInterval(updateClock, 1000);
+
+  document.getElementById('inp').addEventListener('keydown', e => { if (e.key==='Enter') add(); });
+  document.getElementById('modalBg').addEventListener('click', e => { if (e.target===document.getElementById('modalBg')) closeModal(); });
+  document.getElementById('editModalBg').addEventListener('click', e => { if (e.target===document.getElementById('editModalBg')) closeEditModal(); });
+  document.getElementById('editText').addEventListener('keydown', e => { if (e.key==='Enter') saveEdit(); });
+  document.getElementById('listNameInp').addEventListener('keydown', e => { if (e.key==='Enter') confirmAddList(); });
+
+  async function init() {
+    if (!GH.token) { syncStatus('未设置 Token，请先在首页配置'); return; }
+    syncStatus('加载中…');
+    const cloud = await cloudLoad();
+    if (cloud && cloud.topics && cloud.topics.length > 0) { state = cloud; syncStatus(''); }
+    else {
+      const local = JSON.parse(localStorage.getItem('tq4') || 'null');
+      if (local && local.topics && local.topics.length > 0) { state = local; await cloudSave(); }
+      else if (cloud) { state = cloud; syncStatus(''); }
+      else { syncStatus(''); }
+    }
+    render();
+  }
+  init();
+</script>
+</body>
+</html>
