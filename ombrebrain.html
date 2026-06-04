@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OMBREBRAIN — Context Handoff</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0d0f; --surface: #161618; --surface2: #1e1e21;
+    --border: #2a2a2e; --text: #e8e8ea; --muted: #666;
+    --accent: #7c6ef5; --accent-dim: rgba(124,110,245,0.12);
+    --green: #4ade80; --amber: #fbbf24; --amber-dim: rgba(251,191,36,0.1);
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 40px 24px; }
+  .header { max-width: 720px; margin: 0 auto 40px; display: flex; justify-content: space-between; align-items: center; }
+  .back { font-size: 11px; color: var(--muted); text-decoration: none; letter-spacing: 0.1em; }
+  .back:hover { color: var(--text); }
+  .page-title { font-size: 11px; font-weight: 600; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; }
+  .main { max-width: 720px; margin: 0 auto; }
+  .label { font-size: 10px; font-weight: 600; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; margin-bottom: 14px; }
+
+  /* Link panel */
+  .link-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; margin-bottom: 36px; display: flex; gap: 10px; align-items: center; }
+  .link-input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.15s; }
+  .link-input:focus { border-color: var(--accent); }
+  .link-input::placeholder { color: var(--muted); }
+  .save-btn { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 9px 16px; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: inherit; white-space: nowrap; transition: opacity 0.15s; }
+  .save-btn:hover { opacity: 0.85; }
+  .save-btn.success { background: var(--green); color: #000; }
+  .link-display { font-size: 12px; color: var(--accent); text-decoration: none; }
+  .link-display:hover { text-decoration: underline; }
+
+  /* Commands grid */
+  .commands { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; margin-bottom: 36px; }
+  .cmd-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
+  .cmd-name { font-size: 10px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--amber); margin-bottom: 4px; }
+  .cmd-desc { font-size: 12px; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+  .cmd-input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; color: var(--text); font-size: 12px; font-family: inherit; outline: none; margin-bottom: 10px; resize: none; line-height: 1.5; transition: border-color 0.15s; }
+  .cmd-input:focus { border-color: var(--accent); }
+  .cmd-input::placeholder { color: #333; }
+  .cmd-preview { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 12px; color: var(--muted); line-height: 1.6; white-space: pre-wrap; margin-bottom: 10px; min-height: 44px; font-family: inherit; }
+  .copy-btn { background: transparent; border: 1px solid var(--border); border-radius: 7px; padding: 6px 14px; font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .copy-btn.copied { background: var(--green); border-color: var(--green); color: #000; }
+
+  /* Setup guide */
+  .guide { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; }
+  .guide-step { display: flex; gap: 14px; margin-bottom: 20px; }
+  .guide-step:last-child { margin-bottom: 0; }
+  .step-num { width: 24px; height: 24px; border-radius: 6px; background: var(--accent-dim); border: 1px solid rgba(124,110,245,0.2); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: var(--accent); flex-shrink: 0; }
+  .step-body { font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .step-body strong { color: var(--text); font-weight: 500; }
+  .step-body code { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; font-size: 11px; color: var(--amber); font-family: monospace; }
+  a.ext { color: var(--accent); text-decoration: none; }
+  a.ext:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="header">
+  <a class="back" href="index.html">← BACK</a>
+  <div class="page-title">OmbreBrain</div>
+  <div style="width:60px"></div>
+</div>
+<div class="main">
+
+  <div class="label">Your OmbreBrain Link</div>
+  <div class="link-panel" id="linkPanel">
+    <input class="link-input" id="linkInput" type="text" placeholder="粘贴你的 OmbreBrain 链接或仓库地址…">
+    <button class="save-btn" id="saveLinkBtn" onclick="saveLink()">SAVE</button>
+  </div>
+
+  <div class="label">Command Templates</div>
+  <div class="commands" id="commandsGrid"></div>
+
+  <div class="label">Setup Guide</div>
+  <div class="guide">
+    <div class="guide-step">
+      <div class="step-num">1</div>
+      <div class="step-body"><strong>安装 OmbreBrain MCP 服务</strong><br>按照你的 OmbreBrain 文档完成本地安装，确保 MCP 服务在运行中。</div>
+    </div>
+    <div class="guide-step">
+      <div class="step-num">2</div>
+      <div class="step-body"><strong>在 Claude Code 里连接</strong><br>打开 Claude Code 设置，添加 OmbreBrain 为 MCP 服务器。连接成功后克可以直接调用 <code>breath</code>、<code>hold</code>、<code>grow</code>、<code>dream</code>、<code>pulse</code> 等工具。</div>
+    </div>
+    <div class="guide-step">
+      <div class="step-num">3</div>
+      <div class="step-body"><strong>使用上方指令模板</strong><br>选择你需要的操作，填写内容，复制生成的指令，直接发给克即可。克会调用对应的 OmbreBrain 工具完成操作。</div>
+    </div>
+    <div class="guide-step">
+      <div class="step-num">4</div>
+      <div class="step-body"><strong>关于记忆的几个概念</strong><br>
+        <code>hold</code> 存单条记忆，支持标签和重要度 1–10<br>
+        <code>grow</code> 写日记，长内容自动拆分存储<br>
+        <code>breath</code> 检索记忆，可按关键词或自动浮现<br>
+        <code>dream</code> 自省，读取最近新增记忆<br>
+        <code>pulse</code> 查看系统状态和所有记忆桶
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const LINK_KEY = 'ch_ombrebrain_link';
+
+const templates = [
+  {
+    name: 'BREATH — 检索记忆',
+    desc: '按关键词检索相关记忆，空着不填则自动浮现',
+    fields: [{ id: 'b-query', placeholder: '关键词（可留空）', label: '' }],
+    build: v => v[0] ? `请用 OmbreBrain breath 检索关于「${v[0]}」的记忆` : `请用 OmbreBrain breath 自动浮现当前最相关的记忆`
+  },
+  {
+    name: 'HOLD — 存储记忆',
+    desc: '存一条记忆，填写内容和标签',
+    fields: [
+      { id: 'ho-content', placeholder: '要存储的内容…', label: '', rows: 3 },
+      { id: 'ho-tags', placeholder: '标签，用逗号分隔（可选）', label: '' },
+      { id: 'ho-imp', placeholder: '重要度 1–10（可选，默认 5）', label: '' }
+    ],
+    build: v => {
+      let cmd = `请用 OmbreBrain hold 存储这条记忆：${v[0] || '（内容）'}`;
+      if (v[1]) cmd += `，标签：${v[1]}`;
+      if (v[2]) cmd += `，重要度：${v[2]}`;
+      return cmd;
+    }
+  },
+  {
+    name: 'GROW — 写日记',
+    desc: '记录一段日记，长内容自动拆分存储',
+    fields: [{ id: 'g-content', placeholder: '日记内容…', label: '', rows: 4 }],
+    build: v => `请用 OmbreBrain grow 记录：${v[0] || '（内容）'}`
+  },
+  {
+    name: 'DREAM — 自省',
+    desc: '读取最近新增的记忆，做自省回顾',
+    fields: [],
+    build: () => `请用 OmbreBrain dream 读取最近的记忆并做自省`
+  },
+  {
+    name: 'PULSE — 查看状态',
+    desc: '查看记忆系统状态和所有记忆桶列表',
+    fields: [],
+    build: () => `请用 OmbreBrain pulse 查看当前记忆系统状态`
+  },
+  {
+    name: 'FEEL — 存储感受',
+    desc: '让克用第一人称记录一条感受或情绪',
+    fields: [{ id: 'f-content', placeholder: '描述这个感受或情绪…', label: '', rows: 3 }],
+    build: v => `请用 OmbreBrain hold 以第一人称存储这条感受（feel=True）：${v[0] || '（内容）'}`
+  }
+];
+
+function buildGrid() {
+  const grid = document.getElementById('commandsGrid');
+  grid.innerHTML = templates.map((t, ti) => {
+    const fields = t.fields.map(f =>
+      f.rows
+        ? `<textarea class="cmd-input" id="${f.id}" rows="${f.rows}" placeholder="${f.placeholder}" oninput="updatePreview(${ti})"></textarea>`
+        : `<input class="cmd-input" type="text" id="${f.id}" placeholder="${f.placeholder}" oninput="updatePreview(${ti})">`
+    ).join('');
+    return `<div class="cmd-card">
+      <div class="cmd-name">${t.name}</div>
+      <div class="cmd-desc">${t.desc}</div>
+      ${fields}
+      <div class="cmd-preview" id="preview-${ti}">${t.build(t.fields.map(() => ''))}</div>
+      <button class="copy-btn" id="copy-${ti}" onclick="copyCmd(${ti})">COPY</button>
+    </div>`;
+  }).join('');
+}
+
+function updatePreview(ti) {
+  const t = templates[ti];
+  const vals = t.fields.map(f => {
+    const el = document.getElementById(f.id);
+    return el ? el.value.trim() : '';
+  });
+  document.getElementById('preview-'+ti).textContent = t.build(vals);
+}
+
+function copyCmd(ti) {
+  const text = document.getElementById('preview-'+ti).textContent;
+  navigator.clipboard.writeText(text);
+  const btn = document.getElementById('copy-'+ti);
+  btn.textContent = 'COPIED'; btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = 'COPY'; btn.classList.remove('copied'); }, 1400);
+}
+
+function loadLink() {
+  const link = localStorage.getItem(LINK_KEY);
+  if (link) {
+    document.getElementById('linkInput').value = link;
+  }
+}
+
+function saveLink() {
+  const val = document.getElementById('linkInput').value.trim();
+  if (!val) return;
+  localStorage.setItem(LINK_KEY, val);
+  const btn = document.getElementById('saveLinkBtn');
+  btn.textContent = 'SAVED'; btn.classList.add('success');
+  setTimeout(() => { btn.textContent = 'SAVE'; btn.classList.remove('success'); }, 1400);
+}
+
+buildGrid();
+loadLink();
+</script>
+</body>
+</html>
