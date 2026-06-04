@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PROFILE — Context Handoff</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0d0f; --surface: #161618; --surface2: #1e1e21;
+    --border: #2a2a2e; --text: #e8e8ea; --muted: #666;
+    --accent: #7c6ef5; --accent-dim: rgba(124,110,245,0.12);
+    --green: #4ade80;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 40px 24px; }
+  .header { max-width: 680px; margin: 0 auto 48px; display: flex; justify-content: space-between; align-items: center; }
+  .back { font-size: 11px; color: var(--muted); text-decoration: none; letter-spacing: 0.1em; display: flex; align-items: center; gap: 6px; }
+  .back:hover { color: var(--text); }
+  .page-title { font-size: 11px; font-weight: 600; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; }
+  .save-btn { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 7px 16px; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
+  .save-btn:hover { opacity: 0.85; }
+  .save-btn.success { background: var(--green); color: #000; }
+  .save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .main { max-width: 680px; margin: 0 auto; }
+  .field-group { margin-bottom: 28px; }
+  .field-label { font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; display: block; }
+  .field-hint { font-size: 11px; color: #444; margin-bottom: 8px; }
+  input[type=text], textarea {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; color: var(--text); font-size: 13px;
+    font-family: inherit; outline: none; transition: border-color 0.15s; resize: none;
+  }
+  input[type=text]:focus, textarea:focus { border-color: var(--accent); }
+  textarea { line-height: 1.6; }
+  .preview-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-top: 40px; }
+  .preview-label { font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .preview-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; font-size: 12px; color: var(--muted); line-height: 1.7; white-space: pre-wrap; font-family: monospace; }
+  .status { font-size: 11px; color: var(--muted); text-align: right; margin-top: 8px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <a class="back" href="index.html">← BACK</a>
+  <div class="page-title">Profile</div>
+  <button class="save-btn" id="saveBtn" onclick="save()">SAVE</button>
+</div>
+
+<div class="main">
+  <div class="field-group">
+    <label class="field-label">Name / Nickname</label>
+    <div class="field-hint">你叫什么，Claude 怎么称呼你</div>
+    <input type="text" id="f_name" placeholder="e.g. 11">
+  </div>
+
+  <div class="field-group">
+    <label class="field-label">Background</label>
+    <div class="field-hint">学校、专业、所在城市</div>
+    <input type="text" id="f_background" placeholder="e.g. 计算机专业学生，温州上学，上海是家">
+  </div>
+
+  <div class="field-group">
+    <label class="field-label">Tech Stack</label>
+    <div class="field-hint">你会什么、常用什么工具</div>
+    <input type="text" id="f_tech" placeholder="e.g. HTML/CSS/JS，Java，Claude Code，GitHub">
+  </div>
+
+  <div class="field-group">
+    <label class="field-label">Current Focus</label>
+    <div class="field-hint">最近在做什么、关注什么</div>
+    <textarea id="f_focus" rows="3" placeholder="e.g. 正在做 context-handoff 个人网站，期末考试备考中"></textarea>
+  </div>
+
+  <div class="field-group">
+    <label class="field-label">Claude Preferences</label>
+    <div class="field-hint">你希望 Claude 怎么和你协作</div>
+    <textarea id="f_prefs" rows="4" placeholder="e.g. 直接改文件不要给代码块，中文沟通，不需要总结已做了什么，审美偏暗色系圆角"></textarea>
+  </div>
+
+  <div class="field-group">
+    <label class="field-label">Other Context</label>
+    <div class="field-hint">其他你觉得 Claude 需要知道的事</div>
+    <textarea id="f_other" rows="3" placeholder="可选"></textarea>
+  </div>
+
+  <div class="preview-panel">
+    <div class="preview-label">Preview — Claude 读到的内容</div>
+    <div class="preview-box" id="preview">填写后自动预览</div>
+    <div class="status" id="status"></div>
+  </div>
+</div>
+
+<script>
+const OWNER = 'webkit1005-collab';
+const REPO = 'context-handoff';
+const API = 'https://api.github.com';
+const PATH = 'data/profile.json';
+
+function getToken() { return localStorage.getItem('ch_token'); }
+
+const fields = ['name','background','tech','focus','prefs','other'];
+
+function buildSummary(data) {
+  let lines = [];
+  if (data.name)       lines.push(`我叫 ${data.name}。`);
+  if (data.background) lines.push(data.background + '。');
+  if (data.tech)       lines.push(`技术栈：${data.tech}。`);
+  if (data.focus)      lines.push(`当前专注：${data.focus}`);
+  if (data.prefs)      lines.push(`协作偏好：${data.prefs}`);
+  if (data.other)      lines.push(data.other);
+  return lines.join('\n');
+}
+
+function updatePreview() {
+  const data = {};
+  fields.forEach(f => data[f] = document.getElementById('f_'+f).value.trim());
+  document.getElementById('preview').textContent = buildSummary(data) || '填写后自动预览';
+}
+
+fields.forEach(f => document.getElementById('f_'+f).addEventListener('input', updatePreview));
+
+async function load() {
+  const t = getToken();
+  if (!t) return;
+  try {
+    const r = await fetch(`${API}/repos/${OWNER}/${REPO}/contents/${PATH}`, {
+      headers: { Authorization: `token ${t}` }
+    });
+    if (!r.ok) return;
+    const j = await r.json();
+    const data = JSON.parse(atob(j.content.replace(/\n/g,'')));
+    fields.forEach(f => { if (data[f]) document.getElementById('f_'+f).value = data[f]; });
+    document.getElementById('status').textContent = `上次保存：${data.updated || '—'}`;
+    updatePreview();
+  } catch {}
+}
+
+async function save() {
+  const t = getToken();
+  if (!t) { alert('请先在首页设置 GitHub Token'); return; }
+  const btn = document.getElementById('saveBtn');
+  btn.disabled = true; btn.textContent = '...';
+
+  const data = {};
+  fields.forEach(f => data[f] = document.getElementById('f_'+f).value.trim());
+  data.summary = buildSummary(data);
+  data.updated = new Date().toLocaleDateString('zh-CN');
+
+  try {
+    let sha = null;
+    const check = await fetch(`${API}/repos/${OWNER}/${REPO}/contents/${PATH}`, {
+      headers: { Authorization: `token ${t}` }
+    });
+    if (check.ok) { const j = await check.json(); sha = j.sha; }
+
+    const body = { message: 'update profile', content: btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2)))) };
+    if (sha) body.sha = sha;
+
+    const r = await fetch(`${API}/repos/${OWNER}/${REPO}/contents/${PATH}`, {
+      method: 'PUT', headers: { Authorization: `token ${t}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (r.ok) {
+      btn.textContent = 'SAVED'; btn.classList.add('success');
+      document.getElementById('status').textContent = `上次保存：${data.updated}`;
+      setTimeout(() => { btn.textContent = 'SAVE'; btn.classList.remove('success'); btn.disabled = false; }, 1500);
+    } else { throw new Error(); }
+  } catch {
+    btn.textContent = 'ERROR'; btn.style.background = '#f87171';
+    setTimeout(() => { btn.textContent = 'SAVE'; btn.style.background = ''; btn.disabled = false; }, 2000);
+  }
+}
+
+load();
+</script>
+</body>
+</html>
