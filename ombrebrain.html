@@ -105,6 +105,7 @@
 
     <div class="label">粘贴对话内容</div>
     <div class="cmd-card" style="margin-bottom:16px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px">先让 AI 帮你整理一份对话 Markdown 摘要，再粘贴到这里。</div>
       <div class="cmd-desc" style="margin-bottom:12px">把对话文本或 Markdown 摘要粘贴进来，点导入按钮直接发给 Ombre Brain。</div>
       <textarea class="cmd-input" id="importText" rows="12" placeholder="粘贴对话内容、Markdown 摘要、或任何文本…"></textarea>
       <div style="display:flex;gap:10px;align-items:center;margin-top:4px">
@@ -165,7 +166,7 @@ const templates = [
   { name: 'GROW — 写日记', desc: '记录一段日记，长内容自动拆分', fields: [{id:'g-c',placeholder:'日记内容…',rows:4}], build: v => `请用 Ombre Brain grow 记录：${v[0]||'（内容）'}` },
   { name: 'DREAM — 自省', desc: '读取最近新增的记忆，做回顾', fields: [], build: () => `请用 Ombre Brain dream 读取最近的记忆并做自省` },
   { name: 'PULSE — 查看状态', desc: '查看记忆系统状态和所有记忆桶', fields: [], build: () => `请用 Ombre Brain pulse 查看当前记忆系统状态` },
-  { name: 'FEEL — 存储感受', desc: '让克以第一人称记录一条感受', fields: [{id:'f-c',placeholder:'描述这个感受…',rows:3}], build: v => `请用 Ombre Brain hold 以第一人称存储这条感受（feel=True）：${v[0]||'（内容）'}` }
+  { name: 'FEEL — 存储感受', desc: '让 AI 以第一人称记录一条感受', fields: [{id:'f-c',placeholder:'描述这个感受…',rows:3}], build: v => `请用 Ombre Brain hold 以第一人称存储这条感受（feel=True）：${v[0]||'（内容）'}` }
 ];
 
 function switchTab(name) {
