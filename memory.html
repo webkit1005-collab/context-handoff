@@ -81,15 +81,15 @@
     <div class="section-hint">对话快到上下文限制时，用这里生成交接记录，下次换窗直接读取，不需要重新解释背景。</div>
     <div class="panel">
       <div class="step-num">STEP 1</div>
-      <div class="step-desc">复制下方指令，发给 Claude，让它帮你写交接记录。</div>
+      <div class="step-desc">复制下方指令，发给你的 AI，让它帮你写交接记录。</div>
       <div class="copy-template" id="handoff-template">我们聊了挺久了，感觉快换窗了。帮我写个交接小记吧，就像给下一个你留言——今天做了啥、聊到哪了、还有什么没搞完、下次从哪接上。随意点就好。</div>
       <button class="btn-ghost" id="copyTplBtn" onclick="copyTemplate()">COPY INSTRUCTION</button>
     </div>
     <div class="panel">
       <div class="step-num">STEP 2</div>
-      <div class="step-desc">把 Claude 写好的交接记录粘贴到下方，保存后会同步到首页的 Claude Context。</div>
+      <div class="step-desc">把 AI 写好的交接记录粘贴到下方，保存后会同步到首页的 Claude Context。</div>
       <input type="date" id="h-date">
-      <textarea id="h-content" rows="8" placeholder="把 Claude 的回复粘贴在这里…"></textarea>
+      <textarea id="h-content" rows="8" placeholder="把 AI 的回复粘贴在这里…"></textarea>
       <div class="row">
         <div class="sync-status" id="h-status"></div>
         <button class="btn" id="h-save-btn" onclick="addHandoff()">SAVE</button>
@@ -101,7 +101,7 @@
 
   <div class="tab-panel" id="tab-journal">
     <div class="section-hint">用来记录你自己想留存的日常内容，不会出现在首页的 Claude Context 里。</div>
-    <div class="note-box">和 Ombre Brain 的 Grow 有什么区别？Grow 存的是给克看的记忆，存在 Ombre Brain 里；这里的笔记是你自己的，存在 GitHub 里，只有你能看。</div>
+    <div class="note-box">和 Ombre Brain 的 Grow 有什么区别？Grow 存的是给 AI 看的记忆，存在 Ombre Brain 里；这里的笔记是你自己的，存在 GitHub 里，只有你能看。</div>
     <div class="panel">
       <input type="date" id="j-date">
       <textarea id="j-text" rows="6" placeholder="今天发生了什么、想记录什么…"></textarea>
