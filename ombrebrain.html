@@ -50,6 +50,13 @@
   .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
   .copy-btn.copied { background: var(--green); border-color: var(--green); color: #000; }
 
+  .cmd-header { display: flex; align-items: flex-start; justify-content: space-between; cursor: pointer; user-select: none; gap: 12px; }
+  .cmd-header-text .cmd-desc { margin-bottom: 0; }
+  .cmd-chevron { font-size: 10px; color: var(--muted); transition: transform 0.2s; flex-shrink: 0; margin-top: 3px; }
+  .cmd-card.open .cmd-chevron { transform: rotate(90deg); }
+  .cmd-body { display: none; margin-top: 14px; }
+  .cmd-card.open .cmd-body { display: block; }
+
   .guide { display: flex; flex-direction: column; gap: 0; }
   .guide-step { display: flex; gap: 16px; padding: 20px 0; border-bottom: 1px solid var(--border); }
   .guide-step:last-child { border-bottom: none; }
@@ -71,13 +78,13 @@
 </div>
 <div class="main">
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('commands')">指令模板</button>
-    <button class="tab-btn" onclick="switchTab('import')">导入对话</button>
+    <button class="tab-btn active" onclick="switchTab('import')">导入对话</button>
+    <button class="tab-btn" onclick="switchTab('commands')">指令模板</button>
     <button class="tab-btn" onclick="switchTab('guide')">使用指南</button>
   </div>
 
   <!-- 指令模板 -->
-  <div class="tab-panel active" id="tab-commands">
+  <div class="tab-panel" id="tab-commands">
     <div class="label">Your Ombre Brain Link</div>
     <div class="link-panel">
       <input class="link-input" id="linkInput" type="text" placeholder="粘贴你的 Ombre Brain 链接或仓库地址…">
@@ -89,7 +96,7 @@
   </div>
 
   <!-- 导入对话 -->
-  <div class="tab-panel" id="tab-import">
+  <div class="tab-panel active" id="tab-import">
     <div class="label">Ombre Brain 地址</div>
     <div class="link-panel" style="margin-bottom:20px">
       <input class="link-input" id="importUrlInput" type="text" value="http://localhost:8000" placeholder="http://localhost:8000">
@@ -162,7 +169,7 @@ const templates = [
 ];
 
 function switchTab(name) {
-  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['commands','import','guide'][i]===name));
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['import','commands','guide'][i]===name));
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id==='tab-'+name));
 }
 
@@ -230,13 +237,21 @@ function handleDrop(e) {
   handleFile(document.getElementById('importFile'));
 }
 
+function toggleCmd(card, event) {
+  if (event.target.closest('.cmd-body')) return;
+  card.classList.toggle('open');
+}
+
 function buildGrid() {
   document.getElementById('commandsGrid').innerHTML = templates.map((t,ti) => {
     const fields = t.fields.map(f => f.rows
-      ? `<textarea class="cmd-input" id="${f.id}" rows="${f.rows}" placeholder="${f.placeholder}" oninput="updatePreview(${ti})"></textarea>`
-      : `<input class="cmd-input" type="text" id="${f.id}" placeholder="${f.placeholder}" oninput="updatePreview(${ti})">`
+      ? '<textarea class="cmd-input" id="' + f.id + '" rows="' + f.rows + '" placeholder="' + f.placeholder + '" oninput="updatePreview(' + ti + ')"></textarea>'
+      : '<input class="cmd-input" type="text" id="' + f.id + '" placeholder="' + f.placeholder + '" oninput="updatePreview(' + ti + ')">'
     ).join('');
-    return `<div class="cmd-card"><div class="cmd-name">${t.name}</div><div class="cmd-desc">${t.desc}</div>${fields}<div class="cmd-preview" id="preview-${ti}">${t.build(t.fields.map(()=>''))}</div><button class="copy-btn" id="copy-${ti}" onclick="copyCmd(${ti})">COPY</button></div>`;
+    return '<div class="cmd-card" onclick="toggleCmd(this,event)">'
+      + '<div class="cmd-header"><div class="cmd-header-text"><div class="cmd-name">' + t.name + '</div><div class="cmd-desc">' + t.desc + '</div></div><span class="cmd-chevron">▶</span></div>'
+      + '<div class="cmd-body">' + fields + '<div class="cmd-preview" id="preview-' + ti + '">' + t.build(t.fields.map(()=>'')) + '</div><button class="copy-btn" id="copy-' + ti + '" onclick="copyCmd(' + ti + ')">COPY</button></div>'
+      + '</div>';
   }).join('');
 }
 
