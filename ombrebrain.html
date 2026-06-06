@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
@@ -72,6 +72,7 @@
 <div class="main">
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('commands')">指令模板</button>
+    <button class="tab-btn" onclick="switchTab('import')">导入对话</button>
     <button class="tab-btn" onclick="switchTab('guide')">使用指南</button>
   </div>
 
@@ -85,6 +86,35 @@
 
     <div class="label">Templates</div>
     <div class="commands" id="commandsGrid"></div>
+  </div>
+
+  <!-- 导入对话 -->
+  <div class="tab-panel" id="tab-import">
+    <div class="label">Ombre Brain 地址</div>
+    <div class="link-panel" style="margin-bottom:20px">
+      <input class="link-input" id="importUrlInput" type="text" value="http://localhost:8000" placeholder="http://localhost:8000">
+      <button class="save-btn" onclick="saveImportUrl()">SAVE</button>
+    </div>
+
+    <div class="label">粘贴对话内容</div>
+    <div class="cmd-card" style="margin-bottom:16px">
+      <div class="cmd-desc" style="margin-bottom:12px">把对话文本或 Markdown 摘要粘贴进来，点导入按钮直接发给 Ombre Brain。</div>
+      <textarea class="cmd-input" id="importText" rows="12" placeholder="粘贴对话内容、Markdown 摘要、或任何文本…"></textarea>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:4px">
+        <button class="save-btn" id="importBtn" onclick="doImport()">导入到 Ombre Brain</button>
+        <span id="importStatus" style="font-size:12px;color:var(--muted)"></span>
+      </div>
+    </div>
+
+    <div class="label">或上传文件</div>
+    <div class="cmd-card">
+      <div class="cmd-desc" style="margin-bottom:12px">支持 .txt .md .json 格式，拖拽或点击选择。</div>
+      <input type="file" id="importFile" accept=".txt,.md,.json" style="display:none" onchange="handleFile(this)">
+      <div id="dropZone" onclick="document.getElementById('importFile').click()" style="border:1px dashed var(--border);border-radius:8px;padding:28px;text-align:center;cursor:pointer;color:var(--muted);font-size:12px;transition:border-color 0.15s" ondragover="event.preventDefault();this.style.borderColor='var(--accent)'" ondragleave="this.style.borderColor='var(--border)'" ondrop="handleDrop(event)">
+        点击选择文件，或拖拽到这里
+      </div>
+      <div id="fileInfo" style="font-size:11px;color:var(--muted);margin-top:8px"></div>
+    </div>
   </div>
 
   <!-- 使用指南 -->
@@ -132,8 +162,72 @@ const templates = [
 ];
 
 function switchTab(name) {
-  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['commands','guide'][i]===name));
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['commands','import','guide'][i]===name));
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id==='tab-'+name));
+}
+
+const IMPORT_URL_KEY = 'ch_ombrebrain_import_url';
+
+function saveImportUrl() {
+  localStorage.setItem(IMPORT_URL_KEY, document.getElementById('importUrlInput').value.trim());
+}
+
+function loadImportUrl() {
+  const v = localStorage.getItem(IMPORT_URL_KEY);
+  if (v) document.getElementById('importUrlInput').value = v;
+}
+
+async function doImport() {
+  const text = document.getElementById('importText').value.trim();
+  if (!text) { setStatus('请先粘贴内容', 'var(--amber)'); return; }
+  await sendToOmbre(text);
+}
+
+async function sendToOmbre(text, filename) {
+  const base = (document.getElementById('importUrlInput').value.trim() || 'http://localhost:8000').replace(/\/$/, '');
+  const btn = document.getElementById('importBtn');
+  btn.disabled = true;
+  setStatus('导入中…', 'var(--muted)');
+  try {
+    const form = new FormData();
+    const blob = new Blob([text], { type: 'text/plain' });
+    form.append('file', blob, filename || 'import.txt');
+    const res = await fetch(base + '/api/import/upload', { method: 'POST', body: form });
+    if (res.ok) {
+      setStatus('✓ 已提交，Ombre Brain 正在处理', 'var(--green)');
+    } else {
+      const msg = await res.text();
+      setStatus('失败: ' + res.status + ' ' + msg.slice(0,80), '#f87171');
+    }
+  } catch(e) {
+    setStatus('连接失败，确认 Ombre Brain 在运行: ' + e.message, '#f87171');
+  }
+  btn.disabled = false;
+}
+
+function setStatus(msg, color) {
+  const el = document.getElementById('importStatus');
+  el.textContent = msg;
+  el.style.color = color;
+}
+
+function handleFile(input) {
+  const file = input.files[0]; if (!file) return;
+  document.getElementById('fileInfo').textContent = file.name + ' · ' + (file.size/1024).toFixed(1) + ' KB';
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('importText').value = e.target.result;
+    setStatus('文件已读入文本框，点导入按钮发送', 'var(--muted)');
+  };
+  reader.readAsText(file);
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').style.borderColor = 'var(--border)';
+  const file = e.dataTransfer.files[0]; if (!file) return;
+  document.getElementById('importFile').files = e.dataTransfer.files;
+  handleFile(document.getElementById('importFile'));
 }
 
 function buildGrid() {
@@ -173,6 +267,7 @@ function loadLink() {
 
 buildGrid();
 loadLink();
+loadImportUrl();
 </script>
 </body>
 </html>
