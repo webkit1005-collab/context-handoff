@@ -7,52 +7,48 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<script src="theme.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #0d0d0f; --surface: #161618; --surface2: #1e1e21;
-    --border: #2a2a2e; --text: #e8e8ea; --muted: #666;
-    --accent: #7c6ef5; --accent-dim: rgba(124,110,245,0.12);
-    --green: #4ade80; --amber: #fbbf24; --amber-dim: rgba(251,191,36,0.1);
-  }
   body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 40px 24px; }
   .header { max-width: 720px; margin: 0 auto 40px; display: flex; justify-content: space-between; align-items: center; }
-  .back { font-size: 11px; color: var(--muted); text-decoration: none; letter-spacing: 0.1em; }
+  .back { font-size: calc(11px + var(--fz)); color: var(--muted); text-decoration: none; letter-spacing: 0.1em; }
   .back:hover { color: var(--text); }
-  .page-title { font-size: 11px; font-weight: 600; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; }
+  .page-title { font-size: calc(11px + var(--fz)); font-weight: 600; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; }
   .main { max-width: 720px; margin: 0 auto; }
 
   .tabs { display: flex; gap: 4px; margin-bottom: 28px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 4px; width: fit-content; }
-  .tab-btn { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; padding: 7px 18px; border-radius: 7px; border: none; background: transparent; color: var(--muted); cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .tab-btn { font-size: calc(11px + var(--fz)); font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; padding: 7px 18px; border-radius: 7px; border: none; background: transparent; color: var(--muted); cursor: pointer; font-family: inherit; transition: all 0.15s; }
   .tab-btn.active { background: var(--accent); color: #fff; }
   .tab-btn:not(.active):hover { color: var(--text); }
   .tab-panel { display: none; }
   .tab-panel.active { display: block; }
 
-  .label { font-size: 10px; font-weight: 600; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; margin-bottom: 14px; }
+  .label { font-size: calc(10px + var(--fz)); font-weight: 600; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; margin-bottom: 14px; }
   .link-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; margin-bottom: 28px; display: flex; gap: 10px; align-items: center; }
-  .link-input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.15s; }
+  .link-input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: calc(13px + var(--fz)); font-family: inherit; outline: none; transition: border-color 0.15s; }
   .link-input:focus { border-color: var(--accent); }
   .link-input::placeholder { color: var(--muted); }
-  .save-btn { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 9px 16px; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: inherit; white-space: nowrap; transition: opacity 0.15s; }
-  .save-btn:hover { opacity: 0.85; }
+  .save-btn { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 9px 16px; font-size: calc(11px + var(--fz)); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: inherit; white-space: nowrap; transition: transform 0.15s, box-shadow 0.15s; }
+  .save-btn:hover { transform: translateY(1px); box-shadow: var(--press-shadow); }
   .save-btn.success { background: var(--green); }
 
   .commands { display: flex; flex-direction: column; gap: 12px; }
-  .cmd-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; }
-  .cmd-name { font-size: 10px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
-  .cmd-desc { font-size: 12px; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
-  .cmd-input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; color: var(--text); font-size: 12px; font-family: inherit; outline: none; margin-bottom: 10px; resize: none; line-height: 1.5; transition: border-color 0.15s; }
+  .cmd-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; box-shadow: var(--shadow); }
+  .cmd-name { font-size: calc(10px + var(--fz)); font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+  .cmd-desc { font-size: calc(12px + var(--fz)); color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+  .cmd-input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; color: var(--text); font-size: calc(12px + var(--fz)); font-family: inherit; outline: none; margin-bottom: 10px; resize: none; line-height: 1.5; transition: border-color 0.15s; }
   .cmd-input:focus { border-color: var(--accent); }
-  .cmd-input::placeholder { color: #333; }
-  .cmd-preview { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 12px; color: var(--muted); line-height: 1.6; white-space: pre-wrap; margin-bottom: 10px; min-height: 44px; font-family: inherit; }
-  .copy-btn { background: transparent; border: 1px solid var(--border); border-radius: 7px; padding: 6px 14px; font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .cmd-input::placeholder { color: var(--faint); }
+  .cmd-preview { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: calc(12px + var(--fz)); color: var(--muted); line-height: 1.6; white-space: pre-wrap; margin-bottom: 10px; min-height: 44px; font-family: inherit; }
+  .copy-btn { background: transparent; border: 1px solid var(--border); border-radius: 7px; padding: 6px 14px; font-size: calc(10px + var(--fz)); font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); cursor: pointer; font-family: inherit; transition: all 0.15s; }
   .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
   .copy-btn.copied { background: var(--green); border-color: var(--green); color: #000; }
 
   .cmd-header { display: flex; align-items: flex-start; justify-content: space-between; cursor: pointer; user-select: none; gap: 12px; }
   .cmd-header-text .cmd-desc { margin-bottom: 0; }
-  .cmd-chevron { font-size: 10px; color: var(--muted); transition: transform 0.2s; flex-shrink: 0; margin-top: 3px; }
+  .cmd-chevron { font-size: calc(10px + var(--fz)); color: var(--muted); transition: transform 0.2s; flex-shrink: 0; margin-top: 3px; }
   .cmd-card.open .cmd-chevron { transform: rotate(90deg); }
   .cmd-body { display: none; margin-top: 14px; }
   .cmd-card.open .cmd-body { display: block; }
@@ -60,14 +56,14 @@
   .guide { display: flex; flex-direction: column; gap: 0; }
   .guide-step { display: flex; gap: 16px; padding: 20px 0; border-bottom: 1px solid var(--border); }
   .guide-step:last-child { border-bottom: none; }
-  .step-num { width: 26px; height: 26px; border-radius: 7px; background: var(--accent-dim); border: 1px solid rgba(124,110,245,0.2); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: var(--accent); flex-shrink: 0; margin-top: 1px; }
-  .step-body { font-size: 13px; color: var(--muted); line-height: 1.7; }
+  .step-num { width: 26px; height: 26px; border-radius: 7px; background: var(--accent-dim); border: 1px solid var(--accent-line); display: flex; align-items: center; justify-content: center; font-size: calc(11px + var(--fz)); font-weight: 600; color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+  .step-body { font-size: calc(13px + var(--fz)); color: var(--muted); line-height: 1.7; }
   .step-body strong { color: var(--text); font-weight: 500; }
-  code { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; font-size: 11px; color: var(--accent); font-family: monospace; }
+  code { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; font-size: calc(11px + var(--fz)); color: var(--accent); font-family: monospace; }
   .tool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; margin-top: 12px; }
   .tool-item { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
-  .tool-name { font-size: 11px; font-weight: 600; color: var(--accent); margin-bottom: 4px; font-family: monospace; }
-  .tool-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+  .tool-name { font-size: calc(11px + var(--fz)); font-weight: 600; color: var(--accent); margin-bottom: 4px; font-family: monospace; }
+  .tool-desc { font-size: calc(11px + var(--fz)); color: var(--muted); line-height: 1.4; }
 </style>
 </head>
 <body>
@@ -109,7 +105,7 @@
       <textarea class="cmd-input" id="importText" rows="12" placeholder="粘贴对话内容、Markdown 摘要、或任何文本…"></textarea>
       <div style="display:flex;gap:10px;align-items:center;margin-top:4px">
         <button class="save-btn" id="importBtn" onclick="doImport()">导入到 Ombre Brain</button>
-        <span id="importStatus" style="font-size:12px;color:var(--muted)"></span>
+        <span id="importStatus" style="font-size: calc(12px + var(--fz));color:var(--muted)"></span>
       </div>
     </div>
 
@@ -117,10 +113,10 @@
     <div class="cmd-card">
       <div class="cmd-desc" style="margin-bottom:12px">支持 .txt .md .json 格式，拖拽或点击选择。</div>
       <input type="file" id="importFile" accept=".txt,.md,.json" style="display:none" onchange="handleFile(this)">
-      <div id="dropZone" onclick="document.getElementById('importFile').click()" style="border:1px dashed var(--border);border-radius:8px;padding:28px;text-align:center;cursor:pointer;color:var(--muted);font-size:12px;transition:border-color 0.15s" ondragover="event.preventDefault();this.style.borderColor='var(--accent)'" ondragleave="this.style.borderColor='var(--border)'" ondrop="handleDrop(event)">
+      <div id="dropZone" onclick="document.getElementById('importFile').click()" style="border:1px dashed var(--border);border-radius:8px;padding:28px;text-align:center;cursor:pointer;color:var(--muted);font-size: calc(12px + var(--fz));transition:border-color 0.15s" ondragover="event.preventDefault();this.style.borderColor='var(--accent)'" ondragleave="this.style.borderColor='var(--border)'" ondrop="handleDrop(event)">
         点击选择文件，或拖拽到这里
       </div>
-      <div id="fileInfo" style="font-size:11px;color:var(--muted);margin-top:8px"></div>
+      <div id="fileInfo" style="font-size: calc(11px + var(--fz));color:var(--muted);margin-top:8px"></div>
     </div>
   </div>
 
