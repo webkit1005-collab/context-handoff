@@ -5,38 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PROFILE — Context Handoff</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<script src="theme.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #0d0d0f; --surface: #161618; --surface2: #1e1e21;
-    --border: #2a2a2e; --text: #e8e8ea; --muted: #666;
-    --accent: #7c6ef5; --accent-dim: rgba(124,110,245,0.12);
-    --green: #4ade80;
-  }
   body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 40px 24px; }
   .header { max-width: 680px; margin: 0 auto 48px; display: flex; justify-content: space-between; align-items: center; }
-  .back { font-size: 11px; color: var(--muted); text-decoration: none; letter-spacing: 0.1em; display: flex; align-items: center; gap: 6px; }
+  .back { font-size: calc(11px + var(--fz)); color: var(--muted); text-decoration: none; letter-spacing: 0.1em; display: flex; align-items: center; gap: 6px; }
   .back:hover { color: var(--text); }
-  .page-title { font-size: 11px; font-weight: 600; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; }
-  .save-btn { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 7px 16px; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
-  .save-btn:hover { opacity: 0.85; }
+  .page-title { font-size: calc(11px + var(--fz)); font-weight: 600; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; }
+  .save-btn { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 7px 16px; font-size: calc(11px + var(--fz)); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
+  .save-btn:hover { transform: translateY(1px); box-shadow: var(--press-shadow); }
   .save-btn.success { background: var(--green); color: #000; }
   .save-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .main { max-width: 680px; margin: 0 auto; }
   .field-group { margin-bottom: 28px; }
-  .field-label { font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; display: block; }
-  .field-hint { font-size: 11px; color: #444; margin-bottom: 8px; }
+  .field-label { font-size: calc(10px + var(--fz)); font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; display: block; }
+  .field-hint { font-size: calc(11px + var(--fz)); color: var(--faint); margin-bottom: 8px; }
   input[type=text], textarea {
-    width: 100%; background: var(--surface); border: 1px solid var(--border);
-    border-radius: 10px; padding: 12px 14px; color: var(--text); font-size: 13px;
+    width: 100%; background: var(--accent-dim); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; color: var(--text); font-size: calc(13px + var(--fz));
     font-family: inherit; outline: none; transition: border-color 0.15s; resize: none;
   }
   input[type=text]:focus, textarea:focus { border-color: var(--accent); }
   textarea { line-height: 1.6; }
-  .preview-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-top: 40px; }
-  .preview-label { font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
-  .preview-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; font-size: 12px; color: var(--muted); line-height: 1.7; white-space: pre-wrap; font-family: monospace; }
-  .status { font-size: 11px; color: var(--muted); text-align: right; margin-top: 8px; }
+  .preview-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-top: 40px; box-shadow: var(--shadow); }
+  .preview-label { font-size: calc(10px + var(--fz)); font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .preview-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; font-size: calc(12px + var(--fz)); color: var(--muted); line-height: 1.7; white-space: pre-wrap; font-family: monospace; }
+  .status { font-size: calc(11px + var(--fz)); color: var(--muted); text-align: right; margin-top: 8px; }
 </style>
 </head>
 <body>
