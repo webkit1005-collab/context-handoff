@@ -1,0 +1,158 @@
+/* ============================================================
+   Context Handoff — shared theme
+   Blue / white / black / gray · light + dark · 灵动简约
+   Single source of truth for every page's palette + the
+   floating theme toggle. Pages reference these tokens only.
+   ============================================================ */
+
+/* ---------- DARK (default) ---------- */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* tweakable: global font-size bump (px), overridden by theme.js */
+  --fz: 2px;
+
+  /* base */
+  --bg: #0a0c10;
+  --surface: #14161d;
+  --surface2: #1c1f28;
+  --border: #232a37;
+  --border2: #2c3442;
+  --text: #e9ecf3;
+  --muted: #6f7790;
+  --faint: #474e60;
+  --faint2: #383f4f;
+
+  /* accent — blue */
+  --accent: #4a8fff;
+  --accent-dim: rgba(74,143,255,0.13);
+  --accent-line: rgba(74,143,255,0.32);
+
+  /* semantic */
+  --green: #4ade80;
+  --red: #f87171;
+  --amber: #fbbf24;
+  --amber-dim: rgba(251,191,36,0.10);
+  --amber-line: rgba(251,191,36,0.16);
+
+  /* effects */
+  --shadow: none;
+  --shadow-hover: 0 0 0 1px var(--accent-line);
+  --press-shadow: inset 0 2px 8px rgba(0,0,0,0.42);
+  --overlay: rgba(0,0,0,0.78);
+  --on-accent: #ffffff;
+
+  /* ---- todolist aliases (same palette, legacy names) ---- */
+  --blue: var(--accent);
+  --blue-dim: #1e3a6e;
+  --blue-glow: var(--accent-dim);
+  --white: var(--text);
+  --muted2: #8089a3;
+  --card-bg: #21242f;
+  --card-bg-done: #1b1d26;
+  --card-text: #dde3ef;
+  --card-meta: #6b7494;
+  --card-border: rgba(255,255,255,0.07);
+  --card-hover: rgba(220,228,242,0.14);
+  --hairline: rgba(255,255,255,0.08);
+  --urgent: #ff7040;
+  --urgent-bg: rgba(255,112,64,0.10);
+  --urgent-border: rgba(255,96,96,0.30);
+  --stats-bg: #1f222c;
+  --modal-bg: #141720;
+}
+
+/* ---------- LIGHT ---------- */
+[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: #f4f6fa;
+  --surface: #ffffff;
+  --surface2: #f7f8fb;
+  --border: #e7eaf1;
+  --border2: #dfe3ec;
+  --text: #161a23;
+  --muted: #6c7488;
+  --faint: #aab1c2;
+  --faint2: #c2c7d2;
+
+  --accent: #2f6bff;
+  --accent-dim: rgba(47,107,255,0.09);
+  --accent-line: rgba(47,107,255,0.26);
+
+  --green: #16a34a;
+  --red: #e5484d;
+  --amber: #d97706;
+  --amber-dim: rgba(217,119,6,0.08);
+  --amber-line: rgba(217,119,6,0.18);
+
+  --shadow: none;
+  --shadow-hover: 0 6px 20px rgba(26,34,56,0.10);
+  --press-shadow: inset 0 2px 7px rgba(26,34,56,0.14);
+  --overlay: rgba(20,28,46,0.32);
+  --on-accent: #ffffff;
+
+  --blue: var(--accent);
+  --blue-dim: #bcd2ff;
+  --blue-glow: var(--accent-dim);
+  --white: var(--text);
+  --muted2: #6c7488;
+  --card-bg: #ffffff;
+  --card-bg-done: #f1f3f8;
+  --card-text: #1d2230;
+  --card-meta: #8a91a3;
+  --card-border: #e7eaf1;
+  --card-hover: #f7f9fc;
+  --hairline: #ebeef3;
+  --urgent: #f2683c;
+  --urgent-bg: rgba(242,104,60,0.09);
+  --urgent-border: rgba(242,104,60,0.28);
+  --stats-bg: #ffffff;
+  --modal-bg: #ffffff;
+}
+
+/* themed page background — survives host quirks via specificity */
+html[data-theme] { background: var(--bg); transition: background 0.35s ease; }
+
+/* full-viewport backdrop layer injected by theme.js (insurance) */
+.ch-bg-layer {
+  position: fixed; inset: 0; z-index: -1;
+  background: var(--bg);
+  transition: background 0.35s ease;
+  pointer-events: none;
+}
+
+/* smooth cross-fade on theme switch */
+body { transition: background 0.35s ease, color 0.35s ease; }
+
+/* ---------- floating theme toggle (injected by theme.js) ---------- */
+.ch-theme-toggle {
+  position: fixed;
+  bottom: 22px; right: 22px;
+  width: 44px; height: 44px;
+  border-radius: 13px;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 90;
+  box-shadow: var(--shadow);
+  transition: border-color 0.2s, color 0.2s, background 0.35s ease, transform 0.18s, box-shadow 0.2s;
+}
+.ch-theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+.ch-theme-toggle:active { transform: translateY(0) scale(0.92); }
+.ch-theme-toggle svg { width: 19px; height: 19px; display: block; }
+.ch-theme-toggle .i-sun { display: none; }
+[data-theme="light"] .ch-theme-toggle .i-sun  { display: block; }
+[data-theme="light"] .ch-theme-toggle .i-moon { display: none; }
+
+@media (max-width: 520px) {
+  .ch-theme-toggle { bottom: 16px; right: 16px; width: 40px; height: 40px; }
+}
