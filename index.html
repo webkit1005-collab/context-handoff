@@ -7,57 +7,80 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<script src="theme.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #0d0d0f; --surface: #161618; --surface2: #1e1e21;
-    --border: #2a2a2e; --text: #e8e8ea; --muted: #666;
-    --accent: #7c6ef5; --accent-dim: rgba(124,110,245,0.12);
-    --green: #4ade80; --red: #f87171;
-  }
+  :root { --fz: 2px; }
   body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 40px 24px; }
   .header { max-width: 900px; margin: 0 auto 48px; display: flex; justify-content: space-between; align-items: flex-end; }
-  .site-title { font-size: 11px; font-weight: 600; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; }
-  .clock { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .site-title { font-size: calc(11px + var(--fz)); font-weight: 600; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; white-space: nowrap; }
+  .clock { font-size: calc(13px + var(--fz)); color: var(--muted); font-variant-numeric: tabular-nums; }
   .main { max-width: 900px; margin: 0 auto; }
-  .label { font-size: 10px; font-weight: 600; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; margin-bottom: 16px; }
+  .label { font-size: calc(10px + var(--fz)); font-weight: 600; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; margin-bottom: 16px; }
 
   .modules { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 40px; }
   @media (max-width: 800px) { .modules { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 400px) { .modules { grid-template-columns: 1fr; } }
 
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; text-decoration: none; color: inherit; transition: border-color 0.15s, background 0.15s; display: flex; flex-direction: column; }
-  .card:hover { border-color: var(--accent); background: var(--surface2); }
-  .card-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--accent-dim); display: flex; align-items: center; justify-content: center; margin-bottom: 14px; font-size: 15px; flex-shrink: 0; }
-  .card-name { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 6px; }
-  .card-desc { font-size: 12px; color: var(--muted); line-height: 1.5; flex: 1; }
-  .card-meta { margin-top: 14px; font-size: 11px; color: #444; min-height: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; text-decoration: none; color: inherit; transition: border-color 0.15s, background 0.15s, box-shadow 0.18s, transform 0.18s; display: flex; flex-direction: column; box-shadow: var(--shadow); }
+  .card:hover { border-color: var(--accent); background: var(--surface2); box-shadow: var(--press-shadow); transform: translateY(1px); }
+  .card-icon { width: 34px; height: 34px; border-radius: 9px; background: var(--accent-dim); display: flex; align-items: center; justify-content: center; margin-bottom: 16px; flex-shrink: 0; }
+  .card-icon svg { width: 17px; height: 17px; stroke: var(--accent); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .card-name { font-size: calc(11px + var(--fz)); font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 6px; }
+  .card-desc { font-size: calc(12px + var(--fz)); color: var(--muted); line-height: 1.5; flex: 1; }
+  .card-meta { margin-top: 14px; font-size: calc(11px + var(--fz)); color: var(--faint); min-height: 16px; }
 
-  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; box-shadow: var(--shadow); }
   .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
   .panel-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
 
   .pills { display: flex; gap: 6px; flex-wrap: wrap; }
-  .pill { font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; padding: 5px 13px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .pill { font-size: calc(10px + var(--fz)); font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; padding: 5px 13px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; font-family: inherit; transition: border-color 0.15s, color 0.15s; }
   .pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
   .pill:not(.active):hover { border-color: var(--accent); color: var(--accent); }
 
-  .btn { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 7px 14px; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
-  .btn:hover { opacity: 0.85; }
+  .btn { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 7px 14px; font-size: calc(11px + var(--fz)); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; font-family: inherit; transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s, color 0.15s; }
+  .btn:hover { transform: translateY(1px); box-shadow: var(--press-shadow); }
   .btn.success { background: var(--green); color: #000; }
   .btn.secondary { background: transparent; border: 1px solid var(--border); color: var(--muted); }
   .btn.secondary:hover { border-color: var(--red); color: var(--red); opacity: 1; }
-  .context-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; font-size: 13px; color: var(--muted); line-height: 1.7; white-space: pre-wrap; max-height: 220px; overflow-y: auto; font-family: inherit; }
+  .context-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; font-size: calc(13px + var(--fz)); color: var(--muted); line-height: 1.7; white-space: pre-wrap; max-height: 220px; overflow-y: auto; font-family: inherit; }
   .status-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
   .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 6px; }
 
   .setup-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
   .setup-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; width: 100%; max-width: 420px; }
-  .setup-title { font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 8px; }
-  .setup-desc { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
-  .setup-input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 12px; font-family: monospace; outline: none; }
+  .setup-title { font-size: calc(11px + var(--fz)); font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 8px; }
+  .setup-desc { font-size: calc(12px + var(--fz)); color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
+  .setup-input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: calc(12px + var(--fz)); font-family: monospace; outline: none; }
   .setup-input:focus { border-color: var(--accent); }
   .setup-actions { display: flex; gap: 8px; margin-top: 16px; }
+
+  /* ---- Tweaks panel (vanilla host-protocol) ---- */
+  .tw-panel { position: fixed; top: 18px; right: 18px; width: 236px; background: var(--surface); border: 1px solid var(--border2); border-radius: 14px; padding: 16px 16px 6px; z-index: 120; box-shadow: 0 18px 50px rgba(0,0,0,0.28); display: none; font-family: 'DM Sans', sans-serif; }
+  .tw-panel.show { display: block; }
+  .tw-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .tw-title { font-size: 11px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+  .tw-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 17px; line-height: 1; padding: 0; transition: color 0.15s; }
+  .tw-close:hover { color: var(--text); }
+  .tw-row { margin-bottom: 16px; }
+  .tw-label { font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 9px; display: flex; justify-content: space-between; align-items: baseline; }
+  .tw-val { color: var(--accent); font-variant-numeric: tabular-nums; letter-spacing: 0; }
+  .tw-range { width: 100%; height: 4px; -webkit-appearance: none; appearance: none; background: var(--border2); border-radius: 4px; outline: none; cursor: pointer; }
+  .tw-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 15px; height: 15px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--accent); }
+  .tw-range::-moz-range-thumb { width: 15px; height: 15px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid var(--surface); }
+  .tw-swatches { display: flex; gap: 8px; }
+  .tw-sw { width: 28px; height: 28px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: transform 0.12s; }
+  .tw-sw:hover { transform: translateY(-1px); }
+  .tw-sw.active { border-color: var(--text); }
+
+  /* in-page launcher so the panel is always reopenable */
+  .tw-launch { position: fixed; bottom: 22px; right: 78px; width: 44px; height: 44px; border-radius: 13px; border: 1px solid var(--border2); background: var(--surface); color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 90; box-shadow: var(--shadow); transition: border-color 0.2s, color 0.2s, background 0.35s ease, transform 0.18s; }
+  .tw-launch:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+  .tw-launch:active { transform: translateY(0) scale(0.92); }
+  .tw-launch svg { width: 19px; height: 19px; display: block; }
+  @media (max-width: 520px) { .tw-launch { bottom: 16px; right: 68px; width: 40px; height: 40px; } }
 </style>
 </head>
 <body>
@@ -74,7 +97,7 @@
 <div class="header">
   <div class="site-title">Context Handoff</div>
   <div style="display:flex;gap:16px;align-items:center">
-    <button class="btn secondary" onclick="resetToken()" style="padding:4px 10px;font-size:10px">TOKEN</button>
+    <button class="btn secondary" onclick="resetToken()" style="padding:4px 10px;font-size:calc(10px + var(--fz))">TOKEN</button>
     <div class="clock" id="clock">--:--:--</div>
   </div>
 </div>
@@ -83,25 +106,25 @@
   <div class="label">Modules</div>
   <div class="modules">
     <a class="card" href="profile.html">
-      <div class="card-icon">◈</div>
+      <div class="card-icon"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
       <div class="card-name">Profile</div>
       <div class="card-desc">个人信息，给 AI 的基础上下文</div>
       <div class="card-meta" id="profile-meta"></div>
     </a>
     <a class="card" href="todolist.html">
-      <div class="card-icon">✓</div>
+      <div class="card-icon"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 20 6"></polyline><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"></path></svg></div>
       <div class="card-name">Todolist</div>
       <div class="card-desc">话题追踪、任务、DDL</div>
       <div class="card-meta" id="todo-meta"></div>
     </a>
     <a class="card" href="memory.html">
-      <div class="card-icon">◎</div>
+      <div class="card-icon"><svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg></div>
       <div class="card-name">Memory</div>
       <div class="card-desc">换窗交接 + 日常笔记</div>
       <div class="card-meta" id="mem-meta"></div>
     </a>
     <a class="card" href="ombrebrain.html">
-      <div class="card-icon">◉</div>
+      <div class="card-icon"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg></div>
       <div class="card-name">Ombre Brain</div>
       <div class="card-desc">记忆系统，指令模板 + 使用指南</div>
       <div class="card-meta"></div>
@@ -110,7 +133,7 @@
 
   <div class="label">CONTEXT</div>
   <div class="panel">
-    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">
+    <div style="font-size:calc(12px + var(--fz));color:var(--muted);margin-bottom:14px">
       <span class="dot" id="statusDot" style="background:var(--muted)"></span>
       <span id="statusText">加载中…</span>
     </div>
@@ -125,6 +148,105 @@
     </div>
   </div>
 </div>
+
+<button class="tw-launch" id="twLaunch" title="Tweaks（字体 / 主题色）">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+</button>
+
+<div class="tw-panel" id="twPanel">
+  <div class="tw-head">
+    <span class="tw-title">Tweaks</span>
+    <button class="tw-close" id="twClose" title="关闭">×</button>
+  </div>
+  <div class="tw-row">
+    <div class="tw-label"><span>字体大小</span><span class="tw-val" id="twFzVal">+2</span></div>
+    <input type="range" class="tw-range" id="twFz" min="0" max="8" step="1" value="2">
+  </div>
+  <div class="tw-row">
+    <div class="tw-label"><span>主题色</span></div>
+    <div class="tw-swatches" id="twAccent"></div>
+  </div>
+</div>
+
+<script>
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "fontBump": 2,
+  "accent": "default"
+}/*EDITMODE-END*/;
+
+(function () {
+  // Seed shared storage from the on-disk defaults the first time, so a value
+  // saved here propagates to every page (theme.js reads ch_tweaks everywhere).
+  try {
+    if (!localStorage.getItem('ch_tweaks')) {
+      localStorage.setItem('ch_tweaks', JSON.stringify({
+        fontBump: TWEAK_DEFAULTS.fontBump, accent: TWEAK_DEFAULTS.accent
+      }));
+    }
+  } catch (e) {}
+  window.CHTweaks && window.CHTweaks.apply();
+
+  const ACCENTS = (window.CHTweaks && window.CHTweaks.ACCENTS) || {
+    default: null, indigo: { light:'#5b53e0', dark:'#7b73f0' },
+    teal: { light:'#0e8a78', dark:'#2bb5a0' }, slate: { light:'#475569', dark:'#8a93a8' }
+  };
+  const ACCENT_IDS = ['default', 'indigo', 'teal', 'slate'];
+
+  function syncControls() {
+    const tw = window.CHTweaks.get();
+    const fz = document.getElementById('twFz');
+    const fzVal = document.getElementById('twFzVal');
+    if (fz) { fz.value = tw.fontBump; fzVal.textContent = (tw.fontBump >= 0 ? '+' : '') + tw.fontBump; }
+    document.querySelectorAll('.tw-sw').forEach(el => el.classList.toggle('active', el.dataset.id === tw.accent));
+  }
+
+  function setTweak(key, val) {
+    window.CHTweaks.set({ [key]: val });          // writes ch_tweaks + applies (all pages)
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { [key]: val } }, '*'); // host persistence
+    syncControls();
+  }
+
+  // build swatches
+  const wrap = document.getElementById('twAccent');
+  ACCENT_IDS.forEach(id => {
+    const a = ACCENTS[id];
+    const sw = document.createElement('button');
+    sw.className = 'tw-sw';
+    sw.dataset.id = id;
+    sw.style.background = id === 'default' ? '#4a8fff' : a.dark;
+    sw.title = id;
+    sw.onclick = () => setTweak('accent', id);
+    wrap.appendChild(sw);
+  });
+
+  document.getElementById('twFz').addEventListener('input', e => setTweak('fontBump', parseInt(e.target.value, 10)));
+
+  // re-pick accent shade + sync swatches when theme flips
+  new MutationObserver(() => { window.CHTweaks.apply(); syncControls(); })
+    .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  syncControls();
+
+  // ---- host protocol ----
+  const panel = document.getElementById('twPanel');
+  window.addEventListener('message', e => {
+    const t = e && e.data && e.data.type;
+    if (t === '__activate_edit_mode') panel.classList.add('show');
+    else if (t === '__deactivate_edit_mode') panel.classList.remove('show');
+  });
+  document.getElementById('twClose').addEventListener('click', () => {
+    panel.classList.remove('show');
+    window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*');
+  });
+  document.getElementById('twLaunch').addEventListener('click', () => {
+    panel.classList.toggle('show');
+  });
+  window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+
+  window.CHTweaks.apply();
+  syncControls();
+})();
+</script>
 
 <script>
 const OWNER = 'webkit1005-collab', REPO = 'context-handoff', API = 'https://api.github.com';
